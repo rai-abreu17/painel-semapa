@@ -1,0 +1,854 @@
+@let vm = store.vm();
+
+<div data-shell="1" class="app-layout">
+  <aside class="app-sidebar">
+    <div class="app-sidebar__brand flex items-center gap-3">
+        <div class="brand-icon flex-none flex items-center justify-center">
+            <span class="brand-icon-inner block"></span>
+        </div>
+        <div class="flex-col gap-1">
+            <h1 class="font-heading text-xl font-bold tracking-tight text-white m-0 leading-tight">SEMAPA<br>Inteligência de Mercados</h1>
+            <span class="text-on-dark-muted mt-1 font-mono text-xs tracking-wider">PREFEITURA DE SÃO LUÍS · MA</span>
+        </div>
+    </div>
+    
+    <nav class="app-sidebar__nav px-4">
+        @for (g of vm.navGrupos; track g.rot) {
+            <div class="mb-4">
+            @for (it of g.itens; track it.nome) {
+                <button (click)="it.go()" class="app-sidebar__item w-full rounded-md mt-1" [class.active]="it.active">
+                    <span class="flex-1 font-sans text-sm">{{ it.nome }}</span>
+                    @if (it.badge) {
+                        <span class="font-mono text-xs font-semibold px-2 py-1 rounded-full" style="background:{{ it.badgeBg }};color:{{ it.badgeFg }}">{{ it.badge }}</span>
+                    }
+                </button>
+            }
+            </div>
+        }
+    </nav>
+  </aside>
+
+  <main class="app-content transition-all" style="background:{{ vm.camada.fundo }}">
+    <header class="app-header">
+        <div class="flex items-center gap-3">
+            <div class="avatar-circle flex items-center justify-center rounded-full font-bold text-white text-sm">AV</div>
+            <div class="flex-col text-left">
+               <span class="font-sans font-semibold text-sm text-primary">Ana Vasconcelos</span>
+               <span class="font-sans text-xs text-muted">Sessão Auditada</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="px-6 pt-6">
+
+<div class="filter-bar">
+    <!-- Mercado Group -->
+    <div class="filter-group">
+        <span class="filter-label">Mercado</span>
+        <div class="btn-group">
+            @for (m of vm.mercadosOpt; track m.nome) {
+            <button class="btn-filter" [class.active]="m.bg === 'var(--color-primary-dark)'" (click)="m.go()">
+                {{ m.nome }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- Período Group -->
+    <div class="filter-group">
+        <span class="filter-label">Período</span>
+        <div class="btn-group">
+            @for (p of vm.periodosOpt; track p.rot) {
+            <button class="btn-filter" [class.active]="p.bg === 'var(--color-primary-dark)'" (click)="p.go()">
+                {{ p.rot }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- Setor Select -->
+    <div class="min-w-200 filter-group flex-1">
+        <span class="filter-label">Setor</span>
+        <select class="form-select" [value]="vm.setorSel" (change)="vm.setSetor($event)">
+            <option value="">Todas as localizações / setores</option>
+            @for (s of vm.setores; track s.id) {<option [value]="s.id">{{ s.nome }}</option>}
+        </select>
+    </div>
+
+    <!-- Chips Ativos -->
+    <div class="chip-list">
+        @for (c of vm.chips; track c.k) {
+        <span class="chip">
+            <span class="chip__label">{{ c.k }}:</span> <span class="font-sans font-medium">{{ c.v }}</span>
+            <button class="chip__remove" (click)="c.rm()" aria-label="remover filtro">
+                <span class="text-sm material-icons">close</span>
+            </button>
+        </span>
+        }
+    </div>
+</div>
+</div>
+
+    <div class="px-6 py-6 pb-16 dashboard">
+
+@if (vm.ehGeral) {
+<div class="flex-col gap-5">
+
+<div class="kpi-grid">
+    <app-kpi-stat-card
+        title="Índice de movimento"
+        value="96,8"
+        deltaPct="▼ 3,4%"
+        sub="base 100 · coorte fixa de 121 participantes"
+        tone="primary-dark">
+    </app-kpi-stat-card>
+    @for (k of vm.kpis; track k.rot) {
+        <app-kpi-stat-card
+            [title]="k.rot"
+            [value]="k.valor"
+            [sub]="k.sub"
+            [nota]="k.nota"
+            [barra]="k.barra"
+            [tone]="k.tone">
+        </app-kpi-stat-card>
+    }
+</div>
+
+<section class="animate-fade-in-delayed trend-row">
+<div class="p-5 flex-col gap-4 flex-1">
+<div class="flex items-end gap-4 flex-wrap">
+<div class="min-w-230 flex-1 flex-col gap-1">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">ELEMENTO-ASSINATURA</span>
+<h2 class="font-heading text-xl font-bold text-brand m-0">Planta do mercado</h2>
+<span class="text-xs text-secondary">{{ vm.plantaSub }}</span>
+</div>
+<div class="btn-group">
+@for (m of vm.metricasOpt; track m.rot) {
+<button class="btn-filter" (click)="m.go()" title="{{ m.dica }}" [style.background]="m.bg" [style.color]="m.fg" [style.font-weight]="m.w">{{ m.rot }}</button>
+}
+</div>
+<button class="btn-secondary" (click)="vm.toggleTabelaPlanta()">{{ vm.labelTabelaPlanta }}</button>
+</div>
+
+<div class="relative w-full min-h-[300px] aspect-[800/430]" data-plan="1">
+@for (b of vm.plantaBlocos; track $index) {
+<div style="position:absolute;left:{{ b.pl }}%;top:{{ b.pt }}%;width:{{ b.pw }}%;height:{{ b.ph }}%;background:var(--color-surface-muted);border:1px solid #C6CFC2;border-radius:4px"></div>
+}
+@for (b of vm.plantaBlocos; track $index) {
+<span style="position:absolute;left:{{ b.rotL }}%;top:{{ b.rotT }}%;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--color-text-muted);white-space:nowrap">{{ b.rot }}</span>
+}
+@for (c of vm.plantaCells; track $index) {
+<button class="floor-plan-cell" (click)="c.go()" (mouseenter)="c.hover()" (focus)="c.hover()" title="{{ c.tip }}" aria-label="{{ c.tip }}" [style.left.%]="c.pl" [style.top.%]="c.pt" [style.width.%]="c.pw" [style.height.%]="c.ph" [style.background]="c.fill" [style.border]="c.sw + 'px solid ' + c.stroke">
+<span style="font-size:12.5px;font-weight:600;line-height:1.2;color:{{ c.fg }};text-wrap:pretty">{{ c.nome }}</span>
+<span class="flex-col gap-px min-w-0">
+<span style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;line-height:1.1;color:{{ c.fg }};white-space:nowrap">{{ c.val }}</span>
+<span style="font-family:'Inter',sans-serif;font-size:10px;line-height:1.2;color:{{ c.fg2 }};white-space:nowrap">{{ c.nota }}</span>
+</span>
+</button>
+}
+</div>
+
+<div class="flex items-center gap-3 flex-wrap border-t pt-4 mt-2">
+@for (lg of vm.legenda; track lg.rot) {
+<span class="inline-flex items-center gap-2 text-xs text-secondary"><span class="block rounded-sm w-3.5 h-3.5 border border-slate-300" style="background:{{ lg.cor }}"></span>{{ lg.rot }}</span>
+}
+</div>
+
+@if (vm.tabelaPlanta) {
+<div class="animate-fade-in-fast table-container mt-4">
+<table class="table">
+<thead><tr>
+@for (h of vm.cabPlanta; track h.rot) {
+<th >{{ h.rot }}</th>
+}
+</tr></thead>
+<tbody>
+@for (s of vm.setoresView; track s.id) {
+<tr>
+<td >{{ s.nome }}</td>
+<td >{{ s.boxes }}</td>
+<td >{{ s.n }}</td>
+<td >{{ s.cobTxt }}</td>
+<td >{{ s.estadoTxt }}</td>
+</tr>
+}
+</tbody>
+</table>
+</div>
+}
+</div>
+
+<aside class="panel-detail trend-row__side">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">DETALHE DO SETOR</span>
+<div class="flex-col gap-1">
+<span class="font-heading text-xl font-bold text-brand leading-tight">{{ vm.det.nome }}</span>
+<span class="inline-flex items-center gap-2 font-mono text-xs" [style.color]="vm.det.estadoCor"><span class="block rounded-sm w-2 h-2 rotate-45" style="background:{{ vm.det.estadoCor }}"></span>{{ vm.det.estadoTxt }}</span>
+</div>
+<div class="flex-col gap-2">
+@for (l of vm.det.linhas; track l.rot) {
+<div class="border-dotted border-border flex justify-between items-baseline pb-2 border-b">
+<span class="text-xs text-secondary">{{ l.rot }}</span>
+<span class="font-mono text-sm font-semibold text-right" [style.color]="l.cor">{{ l.val }}</span>
+</div>
+}
+</div>
+<div class="bg-white border rounded-md p-4 flex-col gap-2">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">COBERTURA DO SETOR</span>
+<div class="progress-bar-lg">
+<div class="progress-bar-lg__fill" [style.width.%]="vm.det.cobPct" [style.background]="vm.det.cobCor"></div>
+<span class="progress-bar-lg__label" style="color:{{ vm.det.cobFg }}">{{ vm.det.cobPct }}%</span>
+<span class="progress-bar-lg__mark bg-danger" style="left:30%"></span>
+</div>
+<span class="block text-xs text-secondary leading-relaxed text-pretty">{{ vm.det.cobLinha }} · marca vermelha = 30%, limiar de confiabilidade</span>
+</div>
+<span class="text-xs text-secondary leading-relaxed text-pretty">{{ vm.det.explica }}</span>
+<div class="flex-col gap-2 mt-auto">
+@for (a of vm.det.acoes; track a.rot) {
+<button class="btn-secondary w-full justify-between" (click)="a.go()" [style.border-color]="a.br" [style.background]="a.bg" [style.color]="a.fg">{{ a.rot }}<span class="font-mono opacity-60">→</span></button>
+}
+</div>
+</aside>
+</section>
+
+<section class="animate-fade-in-delayed-2 flex-col gap-4 mt-6">
+<div class="flex items-baseline gap-3">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Alertas de decisão</h2>
+<span class="text-xs text-muted font-sans">no máximo 3 · ordenados por prioridade · clique para abrir com o filtro aplicado</span>
+</div>
+@for (a of vm.alertas; track a.id) {
+<div class="card overflow-hidden" [style.border-left]="'4px solid ' + a.cor">
+<div class="flex items-center gap-4 p-4 flex-wrap">
+<span class="flex-none flex items-center justify-center rounded-md font-mono text-base font-semibold min-w-34 h-[34px]" style="background:{{ a.chipBg }};color:{{ a.cor }}">{{ a.seta }}</span>
+<div class="min-w-230 flex-1 flex-col gap-1">
+<span class="text-sm font-semibold text-primary leading-tight">{{ a.titulo }}</span>
+<span class="text-xs text-secondary font-sans">{{ a.nota }}</span>
+</div>
+<span class="badge" style="background:{{ a.chipBg }};color:{{ a.cor }}">{{ a.prioridade }}</span>
+<button class="btn-secondary" (click)="a.expandir()">{{ a.rotExp }}</button>
+<button class="btn-primary" (click)="a.go()">Abrir com filtro →</button>
+</div>
+@if (a.aberto) {
+<div class="pl-16 animate-fade-in-fast bg-surface-muted border-t p-4 flex-col gap-2">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">POR QUE ESTE ALERTA APARECEU</span>
+<span class="text-sm text-secondary leading-relaxed text-pretty max-w-3xl">{{ a.porque }}</span>
+<div class="flex gap-2 flex-wrap mt-1">
+@for (e of a.evidencias; track $index) {
+<span class="font-mono text-xs bg-white border rounded-sm px-2 py-1 text-secondary">{{ e }}</span>
+}
+</div>
+</div>
+}
+</div>
+}
+</section>
+
+<section class="flex-col gap-4 mt-6">
+<div class="flex items-baseline gap-3 flex-wrap">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Setores travados pela supressão</h2>
+<span class="text-xs text-muted font-sans">a contagem de boxes é sempre pública · o valor monetário não</span>
+</div>
+<div class="grid-cols-auto-272 grid gap-4">
+@for (s of vm.cardsSupressao; track s.nome) {
+<div class="card p-5 flex-col gap-2" style="background:var(--color-surface-muted)">
+<div class="flex justify-between items-start gap-3">
+<span class="text-sm font-semibold text-primary leading-tight">{{ s.nome }}</span>
+<span class="badge" style="background:{{ s.tagBg }};color:{{ s.cor }};border-color:{{ s.tagBr }}">{{ s.tag }}</span>
+</div>
+<span class="text-xs text-secondary leading-relaxed">{{ s.explica }}</span>
+<div class="flex-col gap-1 mt-1">
+<div class="flex justify-between font-mono text-xs text-secondary"><span>{{ s.progRot }}</span><span>{{ s.progVal }}</span></div>
+<div class="bg-border-soft h-2 rounded-sm overflow-hidden">
+<div class="h-2 origin-left animate-estica-fast" style="background:{{ s.cor }};width:{{ s.prog }}%"></div>
+</div>
+</div>
+<span class="text-xs font-sans text-brand bg-white border rounded-md px-3 py-2 leading-tight mt-1">{{ s.acao }}</span>
+</div>
+}
+</div>
+</section>
+</div>
+}
+
+@if (vm.ehPrecos) {
+<div class="trend-row">
+<section class="card chart-card flex-col">
+<div class="border-b-soft p-5 border-b border-soft flex justify-between items-end gap-3 flex-wrap">
+<div class="flex-col gap-1">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">CESTA MONITORADA · 14 PRODUTOS</span>
+<h2 class="font-heading text-xl font-bold text-brand m-0">Preço mediano de compra e venda</h2>
+<span class="text-xs text-secondary">média aparada a 10% · clique numa linha para abrir o detalhe · clique no cabeçalho para ordenar</span>
+</div>
+<span class="font-mono text-xs font-semibold bg-surface border rounded-md px-3 py-2 text-brand">Índice de preços {{ vm.indicePrecos }}</span>
+</div>
+<div class="table-container">
+<table class="table">
+<thead><tr>
+@for (h of vm.cabCesta; track h.rot) {
+<th >
+<button (click)="h.go()" class="w-full border-0 bg-transparent py-2 px-3 text-xs tracking-wide font-sans font-bold" style="cursor:{{ h.cursor }};color:{{ h.cor }};text-align:{{ h.al }}">{{ h.rot }}{{ h.dir }}</button>
+</th>
+}
+</tr></thead>
+<tbody>
+@for (p of vm.cestaView; track p.id) {
+<tr (click)="p.go()" [appHoverStyle]="'background:var(--color-surface-alt)'">
+<td >
+<span class="flex-col gap-1"><span style="font-weight:{{ p.w }}">{{ p.nome }}</span>
+<span class="text-xs text-muted font-sans">{{ p.nota }}</span></span></td>
+<td >{{ p.compra }}</td>
+<td >{{ p.venda }}</td>
+<td >
+<span class="flex items-center gap-2 justify-end">
+<span class="w-11 h-2 bg-border-soft block rounded-sm overflow-hidden"><span class="block h-2 bg-success" style="width:{{ p.spreadW }}%"></span></span>
+<span class="min-w-34 font-mono text-secondary tabular-nums text-right">{{ p.spread }}</span>
+</span></td>
+<td >{{ p.varTxt }}</td>
+<td >
+<svg viewBox="0 0 96 22" class="w-24 h-6 block"><path class="animate-traco" attr.d="{{ p.spark }}" fill="none" attr.stroke="{{ p.cor }}" stroke-width="1.6" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"></path></svg></td>
+</tr>
+}
+</tbody>
+</table>
+</div>
+<div class="border-t-soft p-4 border-t bg-surface-muted flex gap-6 flex-wrap text-xs text-secondary">
+<span class="inline-flex items-center gap-2"><span class="block rounded-sm w-2.5 h-2.5 bg-danger"></span>choque de preço (&gt; 2σ)</span>
+<span class="inline-flex items-center gap-2"><span class="block rounded-sm w-2.5 h-2.5 bg-warning"></span>ruptura de oferta</span>
+<span class="inline-flex items-center gap-2"><span class="block rounded-sm w-2.5 h-2.5 bg-slate-300"></span>estável</span>
+</div>
+</section>
+
+<div class="min-w-0 flex-col gap-4">
+<section class="card p-5 flex-col gap-3">
+<div class="flex justify-between items-start gap-3 flex-wrap">
+<div class="flex-col gap-1">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">SÉRIE DE PREÇO · 12 SEMANAS</span>
+<h2 class="font-heading text-xl font-bold text-brand m-0">{{ vm.prodSel.nome }}</h2>
+<span class="text-xs text-secondary">{{ vm.prodSel.nota }}</span>
+</div>
+<span class="font-mono text-xl font-semibold" style="color:{{ vm.prodSel.cor }}">{{ vm.prodSel.varTxt }}</span>
+</div>
+<div class="aspect-[460/190] relative w-full">
+<svg viewBox="0 0 460 190" preserveAspectRatio="none" role="img" aria-label="Série de preço de 12 semanas com banda de mínimo e máximo" class="inset-0 absolute block w-full h-full">
+@for (g of vm.serieGrid; track $index) {
+<line x1="34" attr.y1="{{ g.y }}" x2="452" attr.y2="{{ g.y }}" stroke="var(--color-border-soft)" stroke-width="1"></line>
+}
+<path attr.d="{{ vm.serieBanda }}" fill="#DCE6EE" opacity="0.8"></path>
+@for (e of vm.serieEventos; track $index) {
+<line attr.x1="{{ e.x }}" y1="18" attr.x2="{{ e.x }}" y2="162" stroke="var(--color-warning)" stroke-width="1.3" stroke-dasharray="3 3"></line>
+}
+<path class="animate-traco-fast" attr.d="{{ vm.serieLinha }}" fill="none" stroke="var(--color-primary-dark)" stroke-width="2.4" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"></path>
+</svg>
+@for (g of vm.serieGrid; track $index) {
+<span class="absolute text-muted bg-white font-mono left-0 -translate-y-1/2 text-[9.5px] pr-1" style="top:{{ g.topPct }}%">{{ g.rot }}</span>
+}
+@for (e of vm.serieEventos; track $index) {
+<span class="absolute font-mono whitespace-nowrap rounded-sm top-0 -translate-x-1/2 text-[9.5px] text-warning-darker bg-warning-light-alt px-1.5 py-0.5" style="left:{{ e.leftPct }}%">{{ e.rot }}</span>
+}
+</div>
+<span class="text-xs text-muted leading-relaxed font-sans mt-1">banda = mínimo e máximo entre feirantes participantes · marcadores = feriado, São João, período chuvoso</span>
+</section>
+
+<section class="bg-warning-light border-warning-light card overflow-hidden">
+<div class="bg-warning-light-alt border-b-warning-light p-4 flex justify-between items-center gap-2 border-b">
+<span class="text-warning-dark font-heading text-lg font-bold">Choque de preço e ruptura de oferta</span>
+<span class="font-sans text-xs text-secondary">5 sinais ativos</span>
+</div>
+<div class="px-5 pt-2 pb-4">
+@for (c of vm.choques; track c.txt) {
+<div class="border-b-warning-lighter flex justify-between gap-3 items-center text-sm border-b py-2">
+<span class="text-warning-darkest flex items-center gap-2"><span class="block flex-none w-2 h-2 rotate-45" style="background:{{ c.cor }}"></span>{{ c.txt }}</span>
+<span class="font-mono font-semibold whitespace-nowrap" style="color:{{ c.cor }}">{{ c.val }}</span>
+</div>
+}
+</div>
+</section>
+
+<section class="card p-5 flex-col gap-3">
+<div class="flex-col gap-1">
+<span class="font-heading text-lg font-bold text-brand">Origem declarada da compra</span>
+<span class="text-xs text-secondary">insumo direto para chamada de compras públicas</span>
+</div>
+<div class="h-[34px] flex rounded-md overflow-hidden border">
+@for (o of vm.origem; track o.rot) {
+<span title="{{ o.rot }} · {{ o.pct }}%" class="flex items-center justify-center font-mono text-xs font-semibold text-white" style="width:{{ o.pct }}%;background:{{ o.cor }};transform-origin:left;animation:estica .6s cubic-bezier(.2,.7,.3,1) both">{{ o.pct }}%</span>
+}
+</div>
+<div class="flex gap-4 flex-wrap">
+@for (o of vm.origem; track o.rot) {
+<span class="inline-flex items-center gap-2 text-xs text-secondary"><span class="block rounded-sm w-2.5 h-2.5" style="background:{{ o.cor }}"></span>{{ o.rot }}</span>
+}
+</div>
+<span class="text-xs text-muted leading-relaxed mt-1">Declarada em 61% dos lançamentos de compra.</span>
+</section>
+</div>
+</div>
+}
+
+@if (vm.ehSaude) {
+<div class="flex-col gap-5 animate-sobe">
+<div class="trend-row">
+<section class="bg-primary-pattern text-on-dark rounded-md p-6 flex-col gap-3 justify-center">
+<span class="text-on-dark-muted font-sans text-xs tracking-wider uppercase font-bold">O NÚMERO MAIS ACIONÁVEL DO PAINEL</span>
+<span class="text-on-dark-soft text-sm">Operando com margem negativa</span>
+<span class="text-7xl text-warning-amber font-mono font-semibold leading-none">14%</span>
+<div class="h-2.5 bg-white/12 flex rounded-sm overflow-hidden">
+<span class="w-[14%] origin-left animate-estica bg-danger"></span>
+<span class="w-[86%] bg-white/22"></span>
+</div>
+<span class="text-on-dark-soft text-xs leading-relaxed text-pretty">17 de 121 feirantes participantes com margem mediana abaixo de zero no período.</span>
+<span class="text-danger-light border-white/14 font-mono text-xs border-t pt-2">▲ 3 p.p. vs. período anterior · coorte fixa</span>
+</section>
+<section class="card p-5 flex-col gap-3">
+<div class="flex justify-between items-end gap-3 flex-wrap">
+<div class="flex-col gap-1">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Distribuição de margem</h2>
+<span class="font-mono text-xs text-secondary">n = 121 participantes · 27% de cobertura da base</span>
+</div>
+<span class="font-sans text-xs text-muted">passe o cursor para ver a contagem</span>
+</div>
+<div class="h-[196px] flex items-end gap-3">
+@for (h of vm.histograma; track h.rot) {
+<div title="{{ h.dica }}" class="cursor-default flex-1 flex-col justify-end items-center gap-2 h-full">
+<span class="font-mono text-sm font-semibold" style="color:{{ h.cor }}">{{ h.pct }}%</span>
+<div class="w-full rounded-t-sm origin-bottom animate-cresce transition-filter" style="background:{{ h.cor }};height:{{ h.h }}px" [appHoverStyle]="'filter:brightness(1.12)'"></div>
+<span class="text-xs text-secondary text-center leading-tight">{{ h.rot }}</span>
+<span class="font-mono text-xs text-muted">{{ h.abs }}</span>
+</div>
+}
+</div>
+</section>
+</div>
+
+<div class="grid-cols-auto-238 grid gap-4">
+@for (m of vm.maturidade; track m.rot) {
+<div class="card p-4 flex gap-3 items-center">
+<svg viewBox="0 0 44 44" class="w-13 h-13 flex-none">
+<circle cx="22" cy="22" r="18" fill="none" stroke="var(--color-border-soft)" stroke-width="6"></circle>
+<circle cx="22" cy="22" r="18" fill="none" attr.stroke="{{ m.cor }}" stroke-width="6" stroke-linecap="round" pathLength="1" attr.stroke-dasharray="{{ m.dash }}" transform="rotate(-90 22 22)"></circle>
+</svg>
+<span class="flex-col gap-1 min-w-0">
+<span class="font-mono text-2xl font-semibold leading-none text-brand">{{ m.pct }}%</span>
+<span class="text-xs text-secondary leading-tight">{{ m.rot }}</span>
+<span class="text-xs text-muted font-sans">{{ m.nota }}</span>
+</span>
+</div>
+}
+</div>
+
+<section class="card overflow-hidden">
+<div class="border-b-soft p-5 border-b flex justify-between items-end gap-3 flex-wrap">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Faixas de faturamento por setor</h2>
+<span class="font-sans text-xs text-secondary">bandas largas · mediana entre participantes · k ≥ {{ vm.k }}</span>
+</div>
+<div class="table-container"><table class="table">
+<thead><tr>
+@for (h of vm.cabSaude; track h.rot) {
+<th >{{ h.rot }}</th>
+}
+</tr></thead>
+<tbody>
+@for (s of vm.setoresView; track s.id) {
+<tr [appHoverStyle]="'background:var(--color-surface-alt)'">
+<td >{{ s.nome }}</td>
+<td >{{ s.faixa }}</td>
+<td >{{ s.margemTxt }}</td>
+<td >{{ s.varTxt }}</td>
+<td >{{ s.nota }}</td>
+</tr>
+}
+</tbody>
+</table></div>
+<div class="border-t-soft p-4 bg-surface-muted border-t text-xs text-secondary leading-relaxed text-pretty">Contagem de boxes cadastrados é pública em qualquer valor. Valor monetário só aparece com n ≥ {{ vm.k }} e sem dominância. Variação sobre coorte fixa: apenas feirantes presentes nos dois períodos.</div>
+</section>
+</div>
+}
+
+@if (vm.ehImpacto) {
+<div class="animate-fade-in flex-col gap-5">
+<section class="card p-5 flex-col gap-4">
+<div class="flex justify-between items-end gap-4 flex-wrap">
+<div class="flex-col gap-1">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">A TELA QUE VAI AO GABINETE, AO MP E À IMPRENSA</span>
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Índice de movimento agregado · 24 semanas</h2>
+<span class="font-mono text-xs text-secondary">base 100 · coorte fixa · n = 121 feirantes participantes</span>
+</div>
+<div class="flex gap-4 flex-wrap">
+@for (r of vm.impactoResumo; track r.rot) {
+<span class="flex-col gap-1 pl-3 border-l-3" style="border-left-color:{{ r.cor }}">
+<span class="font-mono text-xs tracking-wide text-muted">{{ r.rot }}</span>
+<span class="font-mono text-lg font-semibold" style="color:{{ r.cor }}">{{ r.val }}</span>
+</span>
+}
+</div>
+</div>
+<div class="aspect-[900/266] min-h-[230px] relative w-full">
+<svg viewBox="0 0 900 266" preserveAspectRatio="none" role="img" aria-label="Índice de movimento agregado em 24 semanas com marcadores de eventos da obra" class="inset-0 absolute block w-full h-full">
+@for (g of vm.impactoGrid; track $index) {
+<line x1="36" attr.y1="{{ g.y }}" x2="890" attr.y2="{{ g.y }}" stroke="var(--color-border-soft)"></line>
+}
+@for (e of vm.impactoEventos; track $index) {
+<line attr.x1="{{ e.x }}" y1="34" attr.x2="{{ e.x }}" y2="212" attr.stroke="{{ e.cor }}" stroke-width="1.3" stroke-dasharray="4 3"></line>
+}
+<path attr.d="{{ vm.impactoArea }}" fill="rgba(18,57,91,.07)"></path>
+<path class="animate-traco-slow" attr.d="{{ vm.impactoLinha }}" fill="none" stroke="var(--color-primary-dark)" stroke-width="2.6" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"></path>
+<path attr.d="{{ vm.impactoProj }}" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-dasharray="5 4"></path>
+</svg>
+@for (g of vm.impactoGrid; track $index) {
+<span class="absolute font-mono text-xs text-muted bg-white left-0 -translate-y-1/2 pr-1" style="top:{{ g.topPct }}%">{{ g.rot }}</span>
+}
+@for (e of vm.impactoEventos; track $index) {
+<span class="absolute flex items-center gap-2 font-mono whitespace-nowrap rounded-sm px-2 py-1 text-[9.5px]" style="left:{{ e.leftPct }}%;top:{{ e.topPct }}%;transform:translateX({{ e.shift }});color:{{ e.cor }};background:{{ e.bg }}"><span class="block rounded-full flex-none w-1.5 h-1.5" style="background:{{ e.cor }}"></span>{{ e.rot }}</span>
+}
+</div>
+</section>
+<div class="trend-row">
+<section class="card p-5 flex-col gap-3">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Comparação entre setores</h2>
+@for (b of vm.barrasSetor; track b.rot) {
+<div class="flex items-center gap-3">
+<span class="basis-[150px] flex-none text-xs text-secondary">{{ b.rot }}</span>
+<div class="h-5 bg-surface-alt flex-1 relative rounded-sm overflow-hidden">
+<span class="absolute w-px inset-y-0 bg-border" style="left:{{ b.base }}%"></span>
+<div class="absolute h-full rounded-sm left-0 top-0 origin-left animate-estica-fast" style="background:{{ b.cor }};width:{{ b.w }}%"></div>
+</div>
+<span class="flex-none text-right font-mono text-sm font-semibold basis-[68px]" style="color:{{ b.cor }}">{{ b.val }}</span>
+</div>
+}
+<span class="font-sans text-xs text-muted">linha cinza = base 100 · setores suprimidos não entram nesta comparação</span>
+</section>
+<section class="bg-white border rounded-lg p-5 flex-col gap-3">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Coorte por tempo de uso</h2>
+@for (b of vm.coortes; track b.rot) {
+<div class="flex items-center gap-3">
+<span class="basis-[132px] flex-none text-xs text-secondary">{{ b.rot }}</span>
+<div class="h-5 bg-surface-alt flex-1 rounded-sm overflow-hidden"><div class="h-full rounded-sm bg-primary-dark origin-left animate-estica-fast" style="width:{{ b.w }}%"></div></div>
+<span class="basis-[60px] flex-none text-right font-mono text-sm font-semibold">{{ b.val }}</span>
+</div>
+}
+<div class="bg-warning-light border border-warning-light border-l-4 border-l-warning flex-col gap-2 rounded-md p-4 mt-2">
+<span class="font-sans text-xs tracking-wider uppercase font-bold" style="color:var(--color-primary-dark)">AVISO DE LEITURA · FIXO NESTE BLOCO</span>
+<span class="text-warning-darkest text-sm leading-relaxed text-pretty">A comparação de coortes sofre viés de seleção e não estabelece causalidade: quem adere primeiro tende a ser quem já tem gestão mais organizada. Estes números descrevem os participantes, não o efeito do programa, e não devem ser apresentados como prova de impacto.</span>
+</div>
+</section>
+</div>
+</div>
+}
+
+@if (vm.ehAdocao) {
+<div class="animate-fade-in flex-col gap-5">
+<div class="grid-cols-auto-210 card grid gap-0 overflow-hidden">
+@for (k of vm.adocaoKpis; track k.rot) {
+<div class="p-5 flex-col gap-2 border-r border-soft">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">{{ k.rot }}</span>
+<span class="font-mono text-4xl font-semibold leading-none text-brand">{{ k.valor }}</span>
+<div class="bg-border-soft h-1.5 rounded-sm overflow-hidden"><div class="h-full bg-brand origin-left animate-estica-fast" style="width:{{ k.barra }}%"></div></div>
+<span class="font-sans text-xs text-secondary">{{ k.sub }}</span>
+</div>
+}
+</div>
+<div class="trend-row">
+<section class="card p-5 flex-col gap-4">
+<div class="flex-col gap-1">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Cobertura e completude por setor</h2>
+<span class="text-xs text-secondary">onde falta busca ativa da equipe de campo · marca vermelha = limiar de 30%</span>
+</div>
+@for (s of vm.setoresView; track s.id) {
+<div class="flex-col gap-2 border-b border-soft pb-3">
+<div class="flex justify-between gap-3 text-sm items-baseline">
+<span class="font-medium">{{ s.nome }}</span>
+<span class="font-mono text-secondary">{{ s.cobLinha }}</span>
+</div>
+<div class="h-3.5 bg-surface-alt relative rounded-sm overflow-hidden">
+<div class="absolute h-full rounded-sm left-0 top-0 origin-left animate-estica-fast" style="background:{{ s.cobCor }};width:{{ s.cobPct }}%"></div>
+<span class="absolute inset-y-0 left-[30%] absolute w-px bg-danger"></span>
+<span class="absolute inset-y-0 right-1.5 text-[10px] absolute flex items-center font-mono text-xs text-secondary">completude {{ s.completude }}%</span>
+</div>
+</div>
+}
+</section>
+<section class="card p-5 flex-col gap-4">
+<div class="flex-col gap-1">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Temas perguntados ao bot</h2>
+<span class="text-xs text-secondary">categorias fechadas · o conteúdo das conversas nunca é exibido</span>
+</div>
+@for (t of vm.temas; track t.rot) {
+<div class="flex-col gap-1">
+<div class="flex justify-between text-sm"><span>{{ t.rot }}</span><span class="font-mono font-semibold">{{ t.pct }}%</span></div>
+<div class="h-3.5 bg-surface-alt rounded-sm overflow-hidden"><div class="h-full rounded-sm origin-left animate-estica-fast" style="background:{{ t.cor }};width:{{ t.w }}%"></div></div>
+</div>
+}
+<span class="text-xs text-secondary leading-relaxed p-3 rounded-md bg-surface-alt">Alimenta a agenda de capacitação do trimestre. Precificação lidera desde abril — sugere oficina fixa no Mercado da Cidade.</span>
+</section>
+</div>
+</div>
+}
+
+@if (vm.ehCadastro) {
+<div class="animate-fade-in flex-col gap-5">
+<div class="bg-brown-light border-brown-light flex items-center gap-4 flex-wrap p-4 rounded-md border">
+<span class="text-xs font-sans tracking-wider whitespace-nowrap px-3 py-1.5 rounded-sm uppercase" style="background:var(--color-primary-dark);color:white">CAMADA 2 · BASE CADASTRAL DO MUNICÍPIO</span>
+<span class="text-warning-darkest min-w-260 text-sm leading-relaxed flex-1">Dado próprio da administração, tratado sob execução de política pública. Nenhum dado financeiro do chatbot aparece nesta tela e nenhum caminho leva daqui ao desempenho de um permissionário.</span>
+</div>
+<div class="grid-cols-auto-198 bg-warning-light border-warning-light grid gap-0 rounded-md overflow-hidden border">
+@for (k of vm.cadastroKpis; track k.rot) {
+<div class="border-warning-border p-5 flex-col gap-2 border-r">
+<span class="font-sans text-xs tracking-wider uppercase font-bold" style="color:var(--color-text-muted)">{{ k.rot }}</span>
+<span class="text-warning-darkest font-mono text-4xl font-semibold leading-none">{{ k.valor }}</span>
+<span class="font-sans text-xs" style="color:var(--color-text-primary)">{{ k.sub }}</span>
+</div>
+}
+</div>
+<div class="trend-row">
+<section class="bg-warning-light border-warning-light card overflow-hidden">
+<div class="border-warning-border p-5 border-b flex justify-between items-baseline gap-3">
+<h2 class="text-warning-darkest font-heading text-xl font-bold m-0">Ocupação de boxes por setor</h2>
+<span class="font-sans text-xs" style="color:var(--color-text-muted)">386 boxes</span>
+</div>
+<div class="px-5 pt-2 pb-4">
+@for (o of vm.ocupacao; track o.nome) {
+<div class="border-warning-border flex items-center gap-3 py-2 border-b">
+<span class="basis-[152px] text-warning-darkest flex-none text-sm">{{ o.nome }}</span>
+<div class="h-4 bg-brown-lighter flex-1 flex rounded-sm overflow-hidden">
+<span title="ocupados" class="bg-brown-dark origin-left animate-estica-faster" style="width:{{ o.pctOcup }}%"></span>
+<span title="vagos" class="bg-brown-light-muted" style="width:{{ o.pctVago }}%"></span>
+</div>
+<span class="basis-[96px] text-brown-muted-dark flex-none text-right font-mono text-xs">{{ o.ocupados }} / {{ o.vagos }} vagos</span>
+</div>
+}
+<div class="flex gap-4 mt-3 text-xs" style="color:var(--color-text-primary)">
+<span class="inline-flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm" style="background:var(--color-primary-dark)"></span>ocupados</span>
+<span class="inline-flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm" style="background:var(--color-border)"></span>vagos</span>
+</div>
+</div>
+</section>
+<div class="flex-col gap-5">
+<section class="bg-warning-light border-warning-light card p-5 flex-col gap-3">
+<div class="flex justify-between items-baseline gap-3">
+<h2 class="text-warning-darkest font-heading text-xl font-bold m-0">Permissionários com pendência</h2>
+<span class="badge badge--danger">41 no total</span>
+</div>
+@for (p of vm.pendencias; track p.nome) {
+<div class="border-warning-border flex justify-between items-center gap-3 border-b pb-2" [appHoverStyle]="'background:#F2EADA'">
+<span class="flex-col gap-1">
+<span class="text-warning-darkest text-sm font-medium">{{ p.nome }}</span>
+<span class="font-sans text-xs" style="color:var(--color-text-muted)">{{ p.box }} · {{ p.setor }}</span>
+</span>
+<span class="badge text-right" style="color:{{ p.cor }};background:{{ p.bg }};border-color:{{ p.br }}">{{ p.pend }}</span>
+</div>
+}
+</section>
+<section class="bg-warning-light border-warning-light card p-5 flex-col gap-3">
+<h2 class="text-warning-darkest font-heading text-xl font-bold m-0">Histórico de transferência de box</h2>
+@for (t of vm.transferencias; track t.txt) {
+<div class="border-warning-border flex justify-between items-center gap-3 text-sm border-b pb-2">
+<span class="text-warning-darkest flex items-center gap-2"><span class="block w-2 h-2 flex-none rotate-45" style="background:{{ t.cor }}"></span>{{ t.txt }}</span>
+<span class="text-brown-muted font-mono whitespace-nowrap">{{ t.data }}</span>
+</div>
+}
+</section>
+</div>
+</div>
+</div>
+}
+
+@if (vm.ehProgramas) {
+<div class="animate-fade-in flex-col gap-5">
+<div class="bg-danger-light border-danger-light flex items-center gap-4 flex-wrap p-4 rounded-md border">
+<span class="text-xs font-sans tracking-wider whitespace-nowrap px-3 py-1.5 rounded-sm uppercase bg-danger text-white">CAMADA 3 · EXCEÇÃO COM OPT-IN</span>
+<span class="text-danger-dark min-w-260 text-sm leading-relaxed flex-1">Acesso individual apenas a quem optou por um programa, apenas durante a janela de análise, apenas pelo analista responsável. Todo acesso exige quebra-vidro, gera log e notifica o titular no WhatsApp.</span>
+</div>
+<div class="trend-row">
+<div class="flex-col gap-4 min-w-0">
+@for (p of vm.programas; track p.id) {
+<section class="card overflow-hidden" style="border-color:{{ p.br }}">
+<div class="h-[3px]" style="background:{{ p.acc }}"></div>
+<div class="p-5 flex-col gap-4">
+<div class="flex justify-between gap-4 flex-wrap items-start">
+<div class="flex-col gap-1">
+<span class="font-heading text-xl font-bold text-brand">{{ p.nome }}</span>
+<span class="inline-flex items-center gap-2 font-mono text-xs" style="color:{{ p.acc }}"><span class="block w-2 h-2 rotate-45" style="background:{{ p.acc }}"></span>{{ p.escopoTxt }}</span>
+</div>
+<div class="flex gap-6">
+<span class="flex-col gap-1"><span class="font-sans text-xs tracking-wider uppercase text-muted font-bold">OPT-IN</span><span class="font-mono text-2xl font-semibold">{{ p.inscritos }}</span></span>
+<span class="flex-col gap-1"><span class="font-sans text-xs tracking-wider uppercase text-muted font-bold">FILA</span><span class="font-mono text-2xl font-semibold">{{ p.fila }}</span></span>
+<span class="flex-col gap-1"><span class="font-sans text-xs tracking-wider uppercase text-muted font-bold">JANELA EXPIRA</span><span class="font-mono text-sm font-semibold" style="color:{{ p.acc }}">{{ p.expira }}</span></span>
+</div>
+</div>
+@if (p.podeVer) {
+<div class="flex-col gap-2">
+@for (f of p.fila_itens; track f.id) {
+<div class="flex justify-between items-center gap-4 border rounded-sm p-3 flex-wrap transition-colors duration-150 border-l-3" style="background:{{ f.bg }};border-color:{{ f.br }};border-left-color:{{ f.marca }}">
+<span class="min-w-210 flex-col gap-1">
+<span class="text-sm font-semibold text-primary">{{ f.rotulo }}</span>
+<span class="font-mono text-xs text-secondary">{{ f.meta }}</span>
+</span>
+@if (f.aberto) {
+<span class="flex-col gap-1 items-end">
+<span class="text-[11.5px] bg-danger-lighter border-danger-lighter inline-flex items-center gap-2 font-mono font-semibold text-danger border rounded-sm px-2 py-1"><span class="block w-2 h-2 rounded-full bg-danger animate-pulse"></span>acesso aberto · expira em {{ vm.contador }}</span>
+<span class="text-[10.5px] font-mono text-success">✓ titular notificado no WhatsApp · {{ f.notif }}</span>
+</span>
+}
+@if (f.fechado) {
+<button (click)="f.abrir()" class="border-danger text-danger btn-primary border bg-white flex items-center gap-2 transition-colors duration-150" [appHoverStyle]="'background:#FDECE7'">Abrir registro · quebra-vidro</button>
+}
+</div>
+}
+</div>
+}
+@if (p.foraEscopo) {
+<div class="bg-striped-green border-border flex items-center gap-3 border rounded-sm p-3 text-sm text-secondary"><span class="font-mono text-lg leading-none">⊘</span>Fila fora do seu escopo. O analista deste programa é o único perfil com acesso — solicite ao encarregado de dados se precisar atuar aqui.</div>
+}
+</div>
+</section>
+}
+</div>
+<aside class="flex-col gap-4">
+<div class="card p-5 flex-col gap-3">
+<span class="font-heading text-lg font-bold text-brand">Acessos neste mês</span>
+@for (a of vm.acessosMes; track a.rot) {
+<div class="flex justify-between items-baseline gap-3 border-b border-soft pb-2">
+<span class="text-sm text-secondary">{{ a.rot }}</span>
+<span class="font-mono text-xl font-semibold" style="color:{{ a.cor }}">{{ a.val }}</span>
+</div>
+}
+<span class="text-xs text-secondary leading-relaxed">Todo acesso desta camada aparece no log de <a href="#" (click)="$event.preventDefault(); vm.irGovernanca()">Governança e privacidade</a> em tempo real.</span>
+</div>
+<div class="bg-primary-dark text-on-dark rounded-md p-5 flex-col gap-2">
+<span class="font-heading text-lg font-bold">O que esta camada não faz</span>
+<span class="text-on-dark-soft text-xs leading-relaxed">Não existe tela, filtro ou exportação que mostre dado financeiro individual de quem não optou por um programa. Não há score, ranking nem classificação de risco de feirante.</span>
+</div>
+</aside>
+</div>
+</div>
+}
+
+@if (vm.ehGov) {
+<div class="animate-fade-in flex-col gap-5">
+<div class="trend-row">
+<section class="card overflow-hidden">
+<div class="p-4 border-b border-soft"><h2 class="font-heading text-xl font-bold m-0 text-brand">Inventário de dados</h2></div>
+<div class="table-container"><table class="table">
+<thead><tr>
+@for (h of vm.cabInv; track h) {
+<th >{{ h }}</th>
+}
+</tr></thead>
+<tbody>
+@for (i of vm.inventario; track i.dado) {
+<tr [appHoverStyle]="'background:var(--color-surface-alt)'">
+<td >{{ i.dado }}<span class="text-xs block font-sans text-muted mt-1">{{ i.camada }}</span></td>
+<td >{{ i.fim }}</td>
+<td >{{ i.base }}</td>
+<td >{{ i.ret }}</td>
+</tr>
+}
+</tbody>
+</table></div>
+</section>
+<section class="card p-5 flex-col gap-3">
+<div class="flex-col gap-1">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Regras de supressão ativas</h2>
+<span class="text-xs text-secondary">configuração legível, não código — vale para todas as telas agora</span>
+</div>
+@for (r of vm.regras; track r.rot) {
+<div class="border-b-dotted border-b-[#C9D0C2] flex justify-between items-baseline gap-3 pb-2">
+<span class="max-w-[58%] text-sm text-secondary leading-relaxed">{{ r.rot }}</span>
+<span class="bg-[#EDF1E7] font-mono text-xs font-semibold text-brand rounded-sm px-2 py-1 text-right">{{ r.val }}</span>
+</div>
+}
+<button (click)="vm.exportar()" class="btn-primary w-full justify-between mt-1 transition-transform" [appHoverStyle]="'transform:translateY(-1px)'">Exportar dados abertos agregados (CSV)<span class="font-mono opacity-70">↓</span></button>
+<span class="text-xs text-muted leading-relaxed">Exportação limitada a recortes que passam pelas regras acima. Séries brutas e recortes individuais são bloqueados na origem.</span>
+</section>
+</div>
+<section class="card overflow-hidden">
+<div class="p-4 border-b border-soft flex justify-between items-center gap-4 flex-wrap">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Log de acessos</h2>
+<div class="flex border rounded-md overflow-hidden">
+@for (f of vm.filtrosLog; track f.rot) {
+<button (click)="f.go()" class="px-3 py-2 font-mono text-xs border-0 cursor-pointer transition-colors duration-150" style="background:{{ f.bg }};color:{{ f.fg }};font-weight:{{ f.w }}">{{ f.rot }}</button>
+}
+</div>
+</div>
+<div class="table-container"><table class="table">
+<thead><tr>
+@for (h of vm.cabLog; track h.rot) {
+<th >{{ h.rot }}</th>
+}
+</tr></thead>
+<tbody>
+@for (l of vm.logs; track $index) {
+<tr [appHoverStyle]="'filter:brightness(.985)'">
+<td >{{ l.quando }}</td>
+<td >{{ l.quem }}</td>
+<td >{{ l.prog }}</td>
+<td >{{ l.motivo }}</td>
+<td >{{ l.regs }}</td>
+<td >{{ l.notif }}</td>
+</tr>
+}
+</tbody>
+</table></div>
+</section>
+<div class="trend-row">
+<section class="card p-5 flex-col gap-3">
+<h2 class="font-heading text-xl font-bold m-0 text-brand">Pedidos de titulares</h2>
+@for (p of vm.pedidos; track p.tipo) {
+<div class="flex justify-between items-center gap-4 border-b border-soft pb-2 flex-wrap">
+<span class="min-w-210 flex-col gap-1"><span class="text-sm font-medium">{{ p.tipo }}</span>
+<span class="font-mono text-xs text-muted">{{ p.meta }}</span></span>
+<span class="flex items-center gap-3">
+<span class="font-mono text-xs text-secondary">SLA {{ p.sla }}</span>
+<span class="font-mono border rounded-sm px-2 py-1 text-[10.5px]" style="background:{{ p.bg }};color:{{ p.cor }};border-color:{{ p.br }}">{{ p.status }}</span>
+</span>
+</div>
+}
+</section>
+<aside class="bg-primary-dark text-on-dark flex-col gap-2 rounded-md p-5">
+<span class="font-heading text-lg font-bold">Encarregado de dados</span>
+<span class="text-on-dark-soft text-sm leading-relaxed">Raimundo Sousa Lima<br>Encarregado (DPO) · SEMAPA<br><span class="font-mono text-xs">dpo.semapa&#64;saoluis.ma.gov.br<br>(98) 3212-0000</span></span>
+<span class="text-on-dark-muted border-white/14 text-xs leading-relaxed border-t pt-2 mt-1">Atendimento a titulares também pelo próprio WhatsApp do serviço, com resposta em até 15 dias.</span>
+</aside>
+</div>
+</div>
+}
+
+</div>
+</main>
+</div>
+
+@if (vm.modalAberto) {
+<app-modal [isOpen]="vm.modalAberto" title="Quebra-vidro · acesso identificado" subtitle="Você vai abrir um registro individual da camada 3. O titular optou por este programa. O acesso será registrado no log, notificado ao titular no WhatsApp e expira ao fim da janela do programa." (close)="vm.fecharModal()">
+<div class="p-6 pb-7 flex-col gap-4">
+<label class="flex-col gap-1">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">MOTIVO · LISTA FECHADA</span>
+<select class="form-select" [value]="vm.bgMotivo" (change)="vm.setBgMotivo($event)">
+<option value="">Selecione o motivo</option>
+@for (m of vm.motivos; track m) {<option [value]="m">{{ m }}</option>}
+</select>
+</label>
+<label class="flex-col gap-1">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">JUSTIFICATIVA · OBRIGATÓRIA</span>
+<textarea class="form-textarea" [value]="vm.bgJust" (change)="vm.setBgJust($event)" rows="3" placeholder="Descreva por que este registro precisa ser aberto agora."></textarea>
+<span class="flex justify-between gap-2 font-mono text-xs">
+<span style="color:{{ vm.bgAviso.cor }}">{{ vm.bgAviso.txt }}</span>
+<span class="text-muted whitespace-nowrap">{{ vm.bgAviso.contagem }}</span>
+</span>
+</label>
+<div class="flex justify-between items-center gap-3 flex-wrap border-t border-soft pt-4 mt-2">
+<span class="flex-col gap-1">
+<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">ESCOPO TEMPORAL</span>
+<span class="font-mono text-sm font-semibold text-danger">expira em {{ vm.contador }}</span>
+</span>
+<span class="flex gap-2">
+<button (click)="vm.fecharModal()" class="btn-secondary">Cancelar</button>
+<button (click)="vm.confirmarBg()" [disabled]="vm.bgBloqueado" class="btn-danger" [style.cursor]="vm.bgBotao.cursor">Registrar acesso e abrir</button>
+</span>
+</div>
+</div>
+</app-modal>
+}
+
+@if (vm.toast) {
+<div class="toast"><span class="toast-icon"></span>{{ vm.toast }}</div>
+}
+
