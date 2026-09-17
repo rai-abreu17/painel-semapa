@@ -1,22 +1,30 @@
 @let vm = store.vm();
 
 <div data-shell="1" class="app-layout">
-  <aside class="app-sidebar">
-    <div class="app-sidebar__brand flex items-center gap-3">
-        <div class="brand-icon flex-none flex items-center justify-center">
-            <span class="brand-icon-inner block"></span>
+  @if (store.mobileMenuOpen()) {
+    <div class="fixed inset-0 bg-black/50 z-40 lg:hidden" (click)="store.toggleMobileMenu()"></div>
+  }
+  <aside class="app-sidebar" [class.menu-open]="store.mobileMenuOpen()">
+    <div class="app-sidebar__brand flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="brand-icon flex-none flex items-center justify-center">
+                <span class="brand-icon-inner block"></span>
+            </div>
+            <div class="flex-col gap-1">
+                <h1 class="font-heading text-xl font-bold tracking-tight text-white m-0 leading-tight">SEMAPA<br>Inteligência de Mercados</h1>
+                <span class="text-on-dark-muted mt-1 font-mono text-xs tracking-wider">PREFEITURA DE SÃO LUÍS · MA</span>
+            </div>
         </div>
-        <div class="flex-col gap-1">
-            <h1 class="font-heading text-xl font-bold tracking-tight text-white m-0 leading-tight">SEMAPA<br>Inteligência de Mercados</h1>
-            <span class="text-on-dark-muted mt-1 font-mono text-xs tracking-wider">PREFEITURA DE SÃO LUÍS · MA</span>
-        </div>
+        <button class="hamburger-btn lg:hidden flex-none text-white p-2" (click)="store.toggleMobileMenu()">
+            <span class="material-icons">close</span>
+        </button>
     </div>
     
     <nav class="app-sidebar__nav px-4">
         @for (g of vm.navGrupos; track g.rot) {
             <div class="mb-4">
             @for (it of g.itens; track it.nome) {
-                <button (click)="it.go()" class="app-sidebar__item w-full rounded-md mt-1" [class.active]="it.active">
+                <button (click)="it.go(); store.mobileMenuOpen.set(false)" class="app-sidebar__item w-full rounded-md mt-1" [class.active]="it.active">
                     <span class="flex-1 font-sans text-sm">{{ it.nome }}</span>
                     @if (it.badge) {
                         <span class="font-mono text-xs font-semibold px-2 py-1 rounded-full" style="background:{{ it.badgeBg }};color:{{ it.badgeFg }}">{{ it.badge }}</span>
@@ -25,14 +33,30 @@
             }
             </div>
         }
+        <div class="mobile-only mt-auto mb-2 pt-4 border-t" style="border-color: rgba(255,255,255,0.1)">
+            <div class="flex items-center gap-3 px-2">
+                <div class="avatar-circle flex items-center justify-center rounded-full font-bold text-white text-sm" style="background: rgba(255,255,255,0.2)">AV</div>
+                <div class="flex-col text-left">
+                   <span class="font-sans font-semibold text-sm text-white">Ana Vasconcelos</span>
+                   <span class="font-sans text-xs text-on-dark-muted">Sessão Auditada</span>
+                </div>
+            </div>
+        </div>
     </nav>
   </aside>
 
   <main class="app-content transition-all" style="background:{{ vm.camada.fundo }}">
-    <header class="app-header">
-        <div class="flex items-center gap-3">
+    <header class="app-header flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <button class="hamburger-btn flex-none text-white p-2 -ml-2" (click)="store.toggleMobileMenu()">
+                <span class="material-icons">menu</span>
+            </button>
+            <!-- Logo para mobile -->
+            <div class="mobile-only font-heading text-lg font-bold text-white leading-tight">SEMAPA</div>
+        </div>
+        <div class="desktop-only items-center gap-3">
             <div class="avatar-circle flex items-center justify-center rounded-full font-bold text-white text-sm">AV</div>
-            <div class="flex-col text-left">
+            <div class="flex-col text-left desktop-only">
                <span class="font-sans font-semibold text-sm text-primary">Ana Vasconcelos</span>
                <span class="font-sans text-xs text-muted">Sessão Auditada</span>
             </div>

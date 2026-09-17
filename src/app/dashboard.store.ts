@@ -56,8 +56,13 @@ export class DashboardStore {
   readonly alertaAberto = signal<string | null>(null);
   readonly filtroLog = signal<string>('todos');
   readonly modal = signal<string | null>(null);
+  readonly mobileMenuOpen = signal<boolean>(false);
   readonly bgMotivo = signal<string>('');
   readonly bgJust = signal<string>('');
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen.update(v => !v);
+  }
   readonly liberado = signal<Record<string, string>>({});
   readonly now = signal<number>(Date.now());
   readonly toast = signal<string>('');
