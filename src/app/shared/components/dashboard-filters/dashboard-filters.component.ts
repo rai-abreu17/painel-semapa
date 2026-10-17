@@ -1,14 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard-filters',
   standalone: true,
   template: `
-    <header class="filter-bar">
-      <!-- Transcluded content for now since semapa has very custom filters -->
-      <ng-content></ng-content>
-    </header>
+    <section class="dashboard-filters" aria-label="Filtros do painel">
+      <div class="dashboard-filters__controls">
+        <ng-content select="[filterControl]" />
+      </div>
+      @if (hasActiveFilters) {
+        <div class="dashboard-filters__active">
+          <ng-content select="[activeFilters]" />
+          <button type="button" class="filter-reset" (click)="reset.emit()"
+            aria-label="Limpar filtros adicionais">Limpar filtros</button>
+        </div>
+      }
+    </section>
   `,
   styles: []
 })
-export class DashboardFiltersComponent {}
+export class DashboardFiltersComponent {
+  @Input() hasActiveFilters = false;
+  @Output() reset = new EventEmitter<void>();
+}

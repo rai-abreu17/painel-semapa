@@ -1,23 +1,24 @@
 import { Component, Input } from '@angular/core';
+import { InfoTipComponent } from '../info-tip/info-tip.component';
 
 @Component({
   selector: 'app-chart-card',
   standalone: true,
+  imports: [InfoTipComponent],
   template: `
     <section class="chart-card card">
       <div class="chart-card__header">
         <div class="chart-card__title-group">
-          @if (eyebrow) {
-             <span class="chart-card__eyebrow">{{ eyebrow }}</span>
-          }
           <h2 class="chart-card__title">
             {{ title }}
-            @if (infoText) {
-              <span class="click-hint" [title]="infoText">i</span>
-            }
           </h2>
-          @if (subtitle) {
-             <span class="chart-card__subtitle">{{ subtitle }}</span>
+          @if (eyebrow || infoText || subtitle || footerText) {
+            <app-info-tip [label]="title">
+              @if (eyebrow) { <span class="tip-line">{{ eyebrow }}</span> }
+              @if (infoText) { <span class="tip-line">{{ infoText }}</span> }
+              @if (subtitle) { <span class="tip-line">{{ subtitle }}</span> }
+              @if (footerText) { <span class="tip-line">{{ footerText }}</span> }
+            </app-info-tip>
           }
         </div>
         <div class="chart-card__actions">
@@ -29,33 +30,8 @@ import { Component, Input } from '@angular/core';
         <ng-content></ng-content>
       </div>
 
-      @if (footerText) {
-        <div class="chart-card__footer">
-          {{ footerText }}
-        </div>
-      }
     </section>
   `,
-  styles: [`
-    .click-hint {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px; height: 18px;
-      font-size: 11px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      color: var(--color-primary);
-      background: var(--color-primary-light);
-      border-radius: 50%;
-      cursor: help;
-      margin-left: 6px;
-      transition: all 0.2s ease;
-    }
-    .click-hint:hover {
-      background: var(--color-primary-light-2);
-    }
-  `]
 })
 export class ChartCardComponent {
   @Input() title!: string;

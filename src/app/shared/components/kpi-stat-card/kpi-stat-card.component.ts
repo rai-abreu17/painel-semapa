@@ -1,19 +1,25 @@
 import { Component, Input } from '@angular/core';
+import { UiIconComponent } from '../ui-icon/ui-icon.component';
+import { InfoTipComponent } from '../info-tip/info-tip.component';
 
 @Component({
   selector: 'app-kpi-stat-card',
   standalone: true,
+  imports: [UiIconComponent, InfoTipComponent],
   template: `
     <div class="kpi-card" [class]="tone">
       <div class="kpi-card__header">
+        <span class="kpi-card__icon"><app-ui-icon [name]="icon || (tone === 'danger' ? 'chart' : tone === 'primary' ? 'records' : 'people')" /></span>
         <span class="kpi-card__title">{{ title }}</span>
-        @if (hint) {
-          <span class="kpi-card__hint-icon" [title]="hint">i</span>
-        }
-        @if (deltaPct) {
-          <span class="kpi-card__delta">{{ deltaPct }}</span>
+        @if (hint || sub || nota) {
+          <app-info-tip [label]="title">
+            @if (hint) { <span class="tip-line">{{ hint }}</span> }
+            @if (sub) { <span class="tip-line">{{ sub }}</span> }
+            @if (nota) { <span class="tip-line">{{ nota }}</span> }
+          </app-info-tip>
         }
       </div>
+
       
       <div class="kpi-card__body">
         <div class="kpi-card__main-val">
@@ -29,6 +35,10 @@ import { Component, Input } from '@angular/core';
           </div>
         }
       </div>
+
+      @if (deltaPct) {
+        <span class="kpi-card__delta">{{ deltaPct }}</span>
+      }
 
       @if (sparkline) {
         <div class="kpi-card__sparkline">
@@ -47,164 +57,12 @@ import { Component, Input } from '@angular/core';
          </div>
       }
       
-      @if (sub) {
-        <span class="kpi-card__sub">{{ sub }}</span>
-      }
-      @if (nota) {
-        <span class="kpi-card__nota">{{ nota }}</span>
-      }
     </div>
   `,
-  styles: [`
-    .kpi-card {
-      background: var(--color-surface-card);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-card-hover);
-      z-index: 1;
-    }
-    
-    .kpi-card.primary-dark {
-      background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
-      color: #ffffff;
-      border-color: var(--color-primary-dark);
-    }
-    .kpi-card.primary {
-      background: linear-gradient(135deg, var(--color-primary) 0%, #6db3dc 100%);
-      color: #ffffff;
-      border-color: var(--color-primary);
-    }
-    .kpi-card.accent {
-      background: linear-gradient(135deg, var(--color-accent-strong) 0%, var(--color-accent-light) 100%);
-      color: #ffffff;
-      border-color: var(--color-accent-strong);
-    }
-    .kpi-card.warning {
-      background: linear-gradient(135deg, var(--color-warning) 0%, #d9822e 100%);
-      color: #ffffff;
-      border-color: var(--color-warning);
-    }
-    .kpi-card.danger {
-      background: linear-gradient(135deg, var(--color-danger) 0%, #c85148 100%);
-      color: #ffffff;
-      border-color: var(--color-danger);
-    }
-
-    .kpi-card__header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .kpi-card__title {
-      font-size: 14px;
-      font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      line-height: 1.3;
-      flex: 1;
-    }
-    .kpi-card__delta {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 600;
-      background: rgba(255,255,255,0.2);
-      padding: 4px 8px;
-      border-radius: var(--radius-sm);
-    }
-    
-    .kpi-card__body {
-      display: flex;
-      align-items: flex-end;
-      gap: 20px;
-      margin-top: 4px;
-    }
-    .kpi-card__main-val {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .kpi-card__main-val .val {
-      font-family: 'Outfit', sans-serif;
-      font-size: 40px;
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -0.02em;
-    }
-    .kpi-card__main-val .lbl, .kpi-card__sec-val .lbl {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      opacity: 0.8;
-      font-family: 'Inter', sans-serif;
-    }
-    .kpi-card__sec-val {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .kpi-card__sec-val .val {
-      font-family: 'Outfit', sans-serif;
-      font-size: 24px;
-      font-weight: 600;
-      line-height: 1;
-    }
-
-    .kpi-card__sub {
-      font-size: 12px;
-      opacity: 0.9;
-      font-family: 'Inter', sans-serif;
-      margin-top: 4px;
-    }
-    .kpi-card__nota {
-      font-size: 11px;
-      opacity: 0.7;
-      line-height: 1.4;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .kpi-card__sparkline {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 48px;
-      pointer-events: none;
-    }
-    .kpi-card__sparkline svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: rgba(0,0,0,0.1);
-      border-radius: var(--radius-pill);
-      overflow: hidden;
-      margin-top: auto;
-    }
-    .progress-bar__fill {
-      height: 8px;
-      background: currentColor;
-      transform-origin: left;
-      animation: estica .6s cubic-bezier(.2,.7,.3,1) both;
-      border-radius: var(--radius-pill);
-    }
-  `]
+  styleUrl: './kpi-stat-card.component.css',
 })
 export class KpiStatCardComponent {
+  @Input() icon?: string;
   @Input() title!: string;
   @Input() value!: string | number;
   @Input() valueLabel?: string;

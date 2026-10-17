@@ -1,77 +1,87 @@
 @let vm = store.vm();
 
+<a class="skip-link" href="#dashboard-content">Pular para o conteúdo</a>
 <div data-shell="1" class="app-layout">
   @if (store.mobileMenuOpen()) {
-    <div class="fixed inset-0 bg-black/50 z-40 lg:hidden" (click)="store.toggleMobileMenu()"></div>
+    <div class="sidebar-backdrop" (click)="toggleNavigation()" aria-hidden="true"></div>
   }
-  <aside class="app-sidebar" [class.menu-open]="store.mobileMenuOpen()">
+  <aside id="main-navigation" class="app-sidebar" [class.menu-open]="store.mobileMenuOpen()" [attr.inert]="store.mobileMenuOpen() ? null : (compactViewport() ? '' : null)">
     <div class="app-sidebar__brand flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
             <div class="brand-icon flex-none flex items-center justify-center">
                 <span class="brand-icon-inner block"></span>
             </div>
             <div class="flex-col gap-1">
-                <h1 class="font-heading text-xl font-bold tracking-tight text-white m-0 leading-tight">SEMAPA<br>Inteligência de Mercados</h1>
+                <div class="brand-title">SEMAPA<br><span>Inteligência de Mercados</span></div>
                 <span class="text-on-dark-muted mt-1 font-mono text-xs tracking-wider">PREFEITURA DE SÃO LUÍS · MA</span>
             </div>
         </div>
-        <button class="hamburger-btn lg:hidden flex-none text-white p-2" (click)="store.toggleMobileMenu()">
-            <span class="material-icons">close</span>
+        <button class="hamburger-btn flex-none" (click)="toggleNavigation()" aria-label="Fechar navegação">
+            <app-ui-icon name="close" />
         </button>
     </div>
     
-    <nav class="app-sidebar__nav px-4">
+    <nav class="app-sidebar__nav px-4" aria-label="Navegação principal">
         @for (g of vm.navGrupos; track g.rot) {
             <div class="mb-4">
+            <span class="nav-group-label">{{ g.rot }}</span>
             @for (it of g.itens; track it.nome) {
-                <button (click)="it.go(); store.mobileMenuOpen.set(false)" class="app-sidebar__item w-full rounded-md mt-1" [class.active]="it.active">
+                <button (click)="navigate(it.go)" class="app-sidebar__item w-full rounded-md mt-1" [class.active]="it.active" [attr.aria-current]="it.active ? 'page' : null">
+                    <app-ui-icon [name]="it.nome" />
                     <span class="flex-1 font-sans text-sm">{{ it.nome }}</span>
                     @if (it.badge) {
-                        <span class="font-mono text-xs font-semibold px-2 py-1 rounded-full" style="background:{{ it.badgeBg }};color:{{ it.badgeFg }}">{{ it.badge }}</span>
+                        <span class="nav-badge">{{ it.badge }}</span>
                     }
                 </button>
             }
             </div>
         }
-        <div class="mobile-only mt-auto mb-2 pt-4 border-t" style="border-color: rgba(255,255,255,0.1)">
+        <div class="sidebar-profile mt-auto mb-2 pt-4 border-t">
             <div class="flex items-center gap-3 px-2">
-                <div class="avatar-circle flex items-center justify-center rounded-full font-bold text-white text-sm" style="background: rgba(255,255,255,0.2)">AV</div>
+                <div class="avatar-circle flex items-center justify-center rounded-full font-bold text-sm">AV</div>
                 <div class="flex-col text-left">
-                   <span class="font-sans font-semibold text-sm text-white">Ana Vasconcelos</span>
-                   <span class="font-sans text-xs text-on-dark-muted">Sessão Auditada</span>
+                   <span class="font-sans font-semibold text-sm text-primary">Ana Vasconcelos</span>
+                   <span class="font-sans text-xs text-muted">Sessão Auditada</span>
                 </div>
             </div>
         </div>
     </nav>
   </aside>
 
-  <main class="app-content transition-all" style="background:{{ vm.camada.fundo }}">
+  <main class="app-content transition-all">
     <header class="app-header flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <button class="hamburger-btn flex-none text-white p-2 -ml-2" (click)="store.toggleMobileMenu()">
-                <span class="material-icons">menu</span>
+            <button class="hamburger-btn flex-none" (click)="toggleNavigation()" aria-label="Abrir navegação" aria-controls="main-navigation" [attr.aria-expanded]="store.mobileMenuOpen()">
+                <app-ui-icon name="menu" />
             </button>
             <!-- Logo para mobile -->
-            <div class="mobile-only font-heading text-lg font-bold text-white leading-tight">SEMAPA</div>
+            <div class="mobile-only font-heading text-lg font-bold text-brand leading-tight">SEMAPA</div>
+            <span class="header-breadcrumb desktop-only">{{ vm.camada.trilha }}</span>
         </div>
-        <div class="desktop-only items-center gap-3">
-            <div class="avatar-circle flex items-center justify-center rounded-full font-bold text-white text-sm">AV</div>
-            <div class="flex-col text-left desktop-only">
-               <span class="font-sans font-semibold text-sm text-primary">Ana Vasconcelos</span>
-               <span class="font-sans text-xs text-muted">Sessão Auditada</span>
-            </div>
-        </div>
+        <div class="header-session"><span class="session-dot"></span>Sessão Auditada<app-ui-icon name="lock" /></div>
     </header>
 
-    <div class="px-6 pt-6">
+    <section class="page-heading" aria-labelledby="page-title">
+        <div class="page-heading__text">
+            <h1 id="page-title" tabindex="-1">{{ vm.telaNome }}</h1>
+            <app-info-tip [label]="vm.telaNome" [text]="vm.telaSub" />
+        </div>
+        <div class="access-badge" [style.--access-color]="vm.selo.dot" [style.--access-bg]="vm.selo.bg">
+            <span class="access-badge__dot"></span>
+            <strong>{{ vm.selo.nivel }}</strong>
+            <app-info-tip [label]="vm.selo.nivel" [text]="vm.selo.texto" />
+        </div>
+    </section>
 
-<div class="filter-bar">
+    <div class="filters-region">
+
+<app-dashboard-filters [hasActiveFilters]="vm.chips.length > 0" (reset)="clearAdditionalFilters()">
     <!-- Mercado Group -->
-    <div class="filter-group">
-        <span class="filter-label">Mercado</span>
-        <div class="btn-group">
+    <div filterControl class="filter-group filter-group--market">
+        <span class="filter-label" id="market-label">Mercado</span>
+        <div class="filter-segment" role="group" aria-labelledby="market-label">
             @for (m of vm.mercadosOpt; track m.nome) {
-            <button class="btn-filter" [class.active]="m.bg === 'var(--color-primary-dark)'" (click)="m.go()">
+            <button class="filter-segment__option" [class.active]="m.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="m.bg === 'var(--color-primary-dark)'" (click)="m.go()">
                 {{ m.nome }}
             </button>
             }
@@ -79,11 +89,11 @@
     </div>
 
     <!-- Período Group -->
-    <div class="filter-group">
-        <span class="filter-label">Período</span>
-        <div class="btn-group">
+    <div filterControl class="filter-group filter-group--period">
+        <span class="filter-label" id="period-label">Período</span>
+        <div class="filter-segment" role="group" aria-labelledby="period-label">
             @for (p of vm.periodosOpt; track p.rot) {
-            <button class="btn-filter" [class.active]="p.bg === 'var(--color-primary-dark)'" (click)="p.go()">
+            <button class="filter-segment__option" [class.active]="p.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="p.bg === 'var(--color-primary-dark)'" (click)="p.go()">
                 {{ p.rot }}
             </button>
             }
@@ -91,29 +101,29 @@
     </div>
 
     <!-- Setor Select -->
-    <div class="min-w-200 filter-group flex-1">
-        <span class="filter-label">Setor</span>
-        <select class="form-select" [value]="vm.setorSel" (change)="vm.setSetor($event)">
+    <div filterControl class="filter-group filter-group--sector">
+        <label class="filter-label" for="sector-filter">Setor</label>
+        <select id="sector-filter" class="filter-select" [class.filter-select--active]="vm.setorSel !== ''" [value]="vm.setorSel" (change)="vm.setSetor($event)">
             <option value="">Todas as localizações / setores</option>
             @for (s of vm.setores; track s.id) {<option [value]="s.id">{{ s.nome }}</option>}
         </select>
     </div>
 
     <!-- Chips Ativos -->
-    <div class="chip-list">
+    <div activeFilters class="chip-list" aria-live="polite">
         @for (c of vm.chips; track c.k) {
         <span class="chip">
             <span class="chip__label">{{ c.k }}:</span> <span class="font-sans font-medium">{{ c.v }}</span>
             <button class="chip__remove" (click)="c.rm()" aria-label="remover filtro">
-                <span class="text-sm material-icons">close</span>
+                <app-ui-icon name="close" />
             </button>
         </span>
         }
     </div>
-</div>
+</app-dashboard-filters>
 </div>
 
-    <div class="px-6 py-6 pb-16 dashboard">
+    <div id="dashboard-content" tabindex="-1" class="dashboard">
 
 @if (vm.ehGeral) {
 <div class="flex-col gap-5">
@@ -123,6 +133,7 @@
         title="Índice de movimento"
         value="96,8"
         deltaPct="▼ 3,4%"
+        icon="activity"
         sub="base 100 · coorte fixa de 121 participantes"
         tone="primary-dark">
     </app-kpi-stat-card>
@@ -139,12 +150,11 @@
 </div>
 
 <section class="animate-fade-in-delayed trend-row">
-<div class="p-5 flex-col gap-4 flex-1">
+<div class="card market-plan p-5 flex-col gap-4 flex-1">
 <div class="flex items-end gap-4 flex-wrap">
 <div class="min-w-230 flex-1 flex-col gap-1">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">ELEMENTO-ASSINATURA</span>
-<h2 class="font-heading text-xl font-bold text-brand m-0">Planta do mercado</h2>
-<span class="text-xs text-secondary">{{ vm.plantaSub }}</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold text-brand m-0">Planta do mercado</h2>
+<app-info-tip label="a planta do mercado"><span class="tip-line">ELEMENTO-ASSINATURA</span>{{ vm.plantaSub }}</app-info-tip></div>
 </div>
 <div class="btn-group">
 @for (m of vm.metricasOpt; track m.rot) {
@@ -154,6 +164,7 @@
 <button class="btn-secondary" (click)="vm.toggleTabelaPlanta()">{{ vm.labelTabelaPlanta }}</button>
 </div>
 
+<div class="plan-scroll" tabindex="0" role="region" aria-label="Planta interativa do mercado">
 <div class="relative w-full min-h-[300px] aspect-[800/430]" data-plan="1">
 @for (b of vm.plantaBlocos; track $index) {
 <div style="position:absolute;left:{{ b.pl }}%;top:{{ b.pt }}%;width:{{ b.pw }}%;height:{{ b.ph }}%;background:var(--color-surface-muted);border:1px solid #C6CFC2;border-radius:4px"></div>
@@ -171,6 +182,7 @@
 </button>
 }
 </div>
+</div>
 
 <div class="flex items-center gap-3 flex-wrap border-t pt-4 mt-2">
 @for (lg of vm.legenda; track lg.rot) {
@@ -179,7 +191,7 @@
 </div>
 
 @if (vm.tabelaPlanta) {
-<div class="animate-fade-in-fast table-container mt-4">
+<div class="animate-fade-in-fast table-container mt-4" tabindex="0" role="region" aria-label="Dados da planta do mercado">
 <table class="table">
 <thead><tr>
 @for (h of vm.cabPlanta; track h.rot) {
@@ -203,9 +215,9 @@
 </div>
 
 <aside class="panel-detail trend-row__side">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">DETALHE DO SETOR</span>
 <div class="flex-col gap-1">
-<span class="font-heading text-xl font-bold text-brand leading-tight">{{ vm.det.nome }}</span>
+<div class="section-heading"><span class="font-heading text-xl font-bold text-brand leading-tight">{{ vm.det.nome }}</span>
+<app-info-tip [label]="vm.det.nome"><span class="tip-line">DETALHE DO SETOR</span>{{ vm.det.explica }}</app-info-tip></div>
 <span class="inline-flex items-center gap-2 font-mono text-xs" [style.color]="vm.det.estadoCor"><span class="block rounded-sm w-2 h-2 rotate-45" style="background:{{ vm.det.estadoCor }}"></span>{{ vm.det.estadoTxt }}</span>
 </div>
 <div class="flex-col gap-2">
@@ -217,15 +229,14 @@
 }
 </div>
 <div class="bg-white border rounded-md p-4 flex-col gap-2">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">COBERTURA DO SETOR</span>
+<div class="section-heading"><span class="font-sans text-xs text-secondary font-medium">COBERTURA DO SETOR</span>
+<app-info-tip label="a cobertura do setor">{{ vm.det.cobLinha }} · marca vermelha = 30%, limiar de confiabilidade</app-info-tip></div>
 <div class="progress-bar-lg">
 <div class="progress-bar-lg__fill" [style.width.%]="vm.det.cobPct" [style.background]="vm.det.cobCor"></div>
 <span class="progress-bar-lg__label" style="color:{{ vm.det.cobFg }}">{{ vm.det.cobPct }}%</span>
 <span class="progress-bar-lg__mark bg-danger" style="left:30%"></span>
 </div>
-<span class="block text-xs text-secondary leading-relaxed text-pretty">{{ vm.det.cobLinha }} · marca vermelha = 30%, limiar de confiabilidade</span>
 </div>
-<span class="text-xs text-secondary leading-relaxed text-pretty">{{ vm.det.explica }}</span>
 <div class="flex-col gap-2 mt-auto">
 @for (a of vm.det.acoes; track a.rot) {
 <button class="btn-secondary w-full justify-between" (click)="a.go()" [style.border-color]="a.br" [style.background]="a.bg" [style.color]="a.fg">{{ a.rot }}<span class="font-mono opacity-60">→</span></button>
@@ -237,7 +248,7 @@
 <section class="animate-fade-in-delayed-2 flex-col gap-4 mt-6">
 <div class="flex items-baseline gap-3">
 <h2 class="font-heading text-xl font-bold m-0 text-brand">Alertas de decisão</h2>
-<span class="text-xs text-muted font-sans">no máximo 3 · ordenados por prioridade · clique para abrir com o filtro aplicado</span>
+<app-info-tip label="os alertas de decisão" text="no máximo 3 · ordenados por prioridade · clique para abrir com o filtro aplicado" />
 </div>
 @for (a of vm.alertas; track a.id) {
 <div class="card overflow-hidden" [style.border-left]="'4px solid ' + a.cor">
@@ -269,23 +280,22 @@
 <section class="flex-col gap-4 mt-6">
 <div class="flex items-baseline gap-3 flex-wrap">
 <h2 class="font-heading text-xl font-bold m-0 text-brand">Setores travados pela supressão</h2>
-<span class="text-xs text-muted font-sans">a contagem de boxes é sempre pública · o valor monetário não</span>
+<app-info-tip label="a supressão" text="a contagem de boxes é sempre pública · o valor monetário não" />
 </div>
 <div class="grid-cols-auto-272 grid gap-4">
 @for (s of vm.cardsSupressao; track s.nome) {
 <div class="card p-5 flex-col gap-2" style="background:var(--color-surface-muted)">
 <div class="flex justify-between items-start gap-3">
 <span class="text-sm font-semibold text-primary leading-tight">{{ s.nome }}</span>
+<app-info-tip [label]="s.nome"><span class="tip-line">{{ s.explica }}</span>{{ s.acao }}</app-info-tip>
 <span class="badge" style="background:{{ s.tagBg }};color:{{ s.cor }};border-color:{{ s.tagBr }}">{{ s.tag }}</span>
 </div>
-<span class="text-xs text-secondary leading-relaxed">{{ s.explica }}</span>
 <div class="flex-col gap-1 mt-1">
 <div class="flex justify-between font-mono text-xs text-secondary"><span>{{ s.progRot }}</span><span>{{ s.progVal }}</span></div>
 <div class="bg-border-soft h-2 rounded-sm overflow-hidden">
 <div class="h-2 origin-left animate-estica-fast" style="background:{{ s.cor }};width:{{ s.prog }}%"></div>
 </div>
 </div>
-<span class="text-xs font-sans text-brand bg-white border rounded-md px-3 py-2 leading-tight mt-1">{{ s.acao }}</span>
 </div>
 }
 </div>
@@ -294,17 +304,16 @@
 }
 
 @if (vm.ehPrecos) {
-<div class="trend-row">
+<div class="trend-row price-layout">
 <section class="card chart-card flex-col">
 <div class="border-b-soft p-5 border-b border-soft flex justify-between items-end gap-3 flex-wrap">
 <div class="flex-col gap-1">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">CESTA MONITORADA · 14 PRODUTOS</span>
-<h2 class="font-heading text-xl font-bold text-brand m-0">Preço mediano de compra e venda</h2>
-<span class="text-xs text-secondary">média aparada a 10% · clique numa linha para abrir o detalhe · clique no cabeçalho para ordenar</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold text-brand m-0">Preço mediano de compra e venda</h2>
+<app-info-tip label="os preços medianos"><span class="tip-line">CESTA MONITORADA · 14 PRODUTOS</span>média aparada a 10% · clique numa linha para abrir o detalhe · clique no cabeçalho para ordenar</app-info-tip></div>
 </div>
 <span class="font-mono text-xs font-semibold bg-surface border rounded-md px-3 py-2 text-brand">Índice de preços {{ vm.indicePrecos }}</span>
 </div>
-<div class="table-container">
+<div class="table-container" tabindex="0" role="region" aria-label="Preços de compra e venda">
 <table class="table">
 <thead><tr>
 @for (h of vm.cabCesta; track h.rot) {
@@ -317,7 +326,7 @@
 @for (p of vm.cestaView; track p.id) {
 <tr (click)="p.go()" [appHoverStyle]="'background:var(--color-surface-alt)'">
 <td >
-<span class="flex-col gap-1"><span style="font-weight:{{ p.w }}">{{ p.nome }}</span>
+<span class="flex-col gap-1"><button type="button" class="table-row-action" style="font-weight:{{ p.w }}">{{ p.nome }}</button>
 <span class="text-xs text-muted font-sans">{{ p.nota }}</span></span></td>
 <td >{{ p.compra }}</td>
 <td >{{ p.venda }}</td>
@@ -345,9 +354,8 @@
 <section class="card p-5 flex-col gap-3">
 <div class="flex justify-between items-start gap-3 flex-wrap">
 <div class="flex-col gap-1">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">SÉRIE DE PREÇO · 12 SEMANAS</span>
-<h2 class="font-heading text-xl font-bold text-brand m-0">{{ vm.prodSel.nome }}</h2>
-<span class="text-xs text-secondary">{{ vm.prodSel.nota }}</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold text-brand m-0">{{ vm.prodSel.nome }}</h2>
+<app-info-tip [label]="vm.prodSel.nome"><span class="tip-line">SÉRIE DE PREÇO · 12 SEMANAS</span><span class="tip-line">{{ vm.prodSel.nota }}</span>banda = mínimo e máximo entre feirantes participantes · marcadores = feriado, São João, período chuvoso</app-info-tip></div>
 </div>
 <span class="font-mono text-xl font-semibold" style="color:{{ vm.prodSel.cor }}">{{ vm.prodSel.varTxt }}</span>
 </div>
@@ -369,7 +377,6 @@
 <span class="absolute font-mono whitespace-nowrap rounded-sm top-0 -translate-x-1/2 text-[9.5px] text-warning-darker bg-warning-light-alt px-1.5 py-0.5" style="left:{{ e.leftPct }}%">{{ e.rot }}</span>
 }
 </div>
-<span class="text-xs text-muted leading-relaxed font-sans mt-1">banda = mínimo e máximo entre feirantes participantes · marcadores = feriado, São João, período chuvoso</span>
 </section>
 
 <section class="bg-warning-light border-warning-light card overflow-hidden">
@@ -389,8 +396,8 @@
 
 <section class="card p-5 flex-col gap-3">
 <div class="flex-col gap-1">
-<span class="font-heading text-lg font-bold text-brand">Origem declarada da compra</span>
-<span class="text-xs text-secondary">insumo direto para chamada de compras públicas</span>
+<div class="section-heading"><span class="font-heading text-lg font-bold text-brand">Origem declarada da compra</span>
+<app-info-tip label="a origem da compra"><span class="tip-line">insumo direto para chamada de compras públicas</span>Declarada em 61% dos lançamentos de compra.</app-info-tip></div>
 </div>
 <div class="h-[34px] flex rounded-md overflow-hidden border">
 @for (o of vm.origem; track o.rot) {
@@ -402,7 +409,6 @@
 <span class="inline-flex items-center gap-2 text-xs text-secondary"><span class="block rounded-sm w-2.5 h-2.5" style="background:{{ o.cor }}"></span>{{ o.rot }}</span>
 }
 </div>
-<span class="text-xs text-muted leading-relaxed mt-1">Declarada em 61% dos lançamentos de compra.</span>
 </section>
 </div>
 </div>
@@ -412,23 +418,21 @@
 <div class="flex-col gap-5 animate-sobe">
 <div class="trend-row">
 <section class="bg-primary-pattern text-on-dark rounded-md p-6 flex-col gap-3 justify-center">
-<span class="text-on-dark-muted font-sans text-xs tracking-wider uppercase font-bold">O NÚMERO MAIS ACIONÁVEL DO PAINEL</span>
-<span class="text-on-dark-soft text-sm">Operando com margem negativa</span>
+<div class="section-heading"><span class="text-on-dark-soft text-sm">Operando com margem negativa</span>
+<app-info-tip label="a margem negativa"><span class="tip-line">O NÚMERO MAIS ACIONÁVEL DO PAINEL</span>17 de 121 feirantes participantes com margem mediana abaixo de zero no período.</app-info-tip></div>
 <span class="text-7xl text-warning-amber font-mono font-semibold leading-none">14%</span>
 <div class="h-2.5 bg-white/12 flex rounded-sm overflow-hidden">
 <span class="w-[14%] origin-left animate-estica bg-danger"></span>
 <span class="w-[86%] bg-white/22"></span>
 </div>
-<span class="text-on-dark-soft text-xs leading-relaxed text-pretty">17 de 121 feirantes participantes com margem mediana abaixo de zero no período.</span>
 <span class="text-danger-light border-white/14 font-mono text-xs border-t pt-2">▲ 3 p.p. vs. período anterior · coorte fixa</span>
 </section>
 <section class="card p-5 flex-col gap-3">
 <div class="flex justify-between items-end gap-3 flex-wrap">
 <div class="flex-col gap-1">
-<h2 class="font-heading text-xl font-bold m-0 text-brand">Distribuição de margem</h2>
-<span class="font-mono text-xs text-secondary">n = 121 participantes · 27% de cobertura da base</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Distribuição de margem</h2>
+<app-info-tip label="a distribuição de margem"><span class="tip-line">n = 121 participantes · 27% de cobertura da base</span>passe o cursor para ver a contagem</app-info-tip></div>
 </div>
-<span class="font-sans text-xs text-muted">passe o cursor para ver a contagem</span>
 </div>
 <div class="h-[196px] flex items-end gap-3">
 @for (h of vm.histograma; track h.rot) {
@@ -453,7 +457,7 @@
 <span class="flex-col gap-1 min-w-0">
 <span class="font-mono text-2xl font-semibold leading-none text-brand">{{ m.pct }}%</span>
 <span class="text-xs text-secondary leading-tight">{{ m.rot }}</span>
-<span class="text-xs text-muted font-sans">{{ m.nota }}</span>
+<app-info-tip [label]="m.rot" [text]="m.nota" />
 </span>
 </div>
 }
@@ -462,9 +466,9 @@
 <section class="card overflow-hidden">
 <div class="border-b-soft p-5 border-b flex justify-between items-end gap-3 flex-wrap">
 <h2 class="font-heading text-xl font-bold m-0 text-brand">Faixas de faturamento por setor</h2>
-<span class="font-sans text-xs text-secondary">bandas largas · mediana entre participantes · k ≥ {{ vm.k }}</span>
+<app-info-tip label="as faixas de faturamento"><span class="tip-line">bandas largas · mediana entre participantes · k ≥ {{ vm.k }}</span>Contagem de boxes cadastrados é pública em qualquer valor. Valor monetário só aparece com n ≥ {{ vm.k }} e sem dominância. Variação sobre coorte fixa: apenas feirantes presentes nos dois períodos.</app-info-tip>
 </div>
-<div class="table-container"><table class="table">
+<div class="table-container" tabindex="0" role="region" aria-label="Faixas de faturamento por setor"><table class="table">
 <thead><tr>
 @for (h of vm.cabSaude; track h.rot) {
 <th >{{ h.rot }}</th>
@@ -482,7 +486,6 @@
 }
 </tbody>
 </table></div>
-<div class="border-t-soft p-4 bg-surface-muted border-t text-xs text-secondary leading-relaxed text-pretty">Contagem de boxes cadastrados é pública em qualquer valor. Valor monetário só aparece com n ≥ {{ vm.k }} e sem dominância. Variação sobre coorte fixa: apenas feirantes presentes nos dois períodos.</div>
 </section>
 </div>
 }
@@ -492,9 +495,8 @@
 <section class="card p-5 flex-col gap-4">
 <div class="flex justify-between items-end gap-4 flex-wrap">
 <div class="flex-col gap-1">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">A TELA QUE VAI AO GABINETE, AO MP E À IMPRENSA</span>
-<h2 class="font-heading text-xl font-bold m-0 text-brand">Índice de movimento agregado · 24 semanas</h2>
-<span class="font-mono text-xs text-secondary">base 100 · coorte fixa · n = 121 feirantes participantes</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Índice de movimento agregado · 24 semanas</h2>
+<app-info-tip label="o índice de movimento"><span class="tip-line">A TELA QUE VAI AO GABINETE, AO MP E À IMPRENSA</span>base 100 · coorte fixa · n = 121 feirantes participantes</app-info-tip></div>
 </div>
 <div class="flex gap-4 flex-wrap">
 @for (r of vm.impactoResumo; track r.rot) {
@@ -527,7 +529,8 @@
 </section>
 <div class="trend-row">
 <section class="card p-5 flex-col gap-3">
-<h2 class="font-heading text-xl font-bold m-0 text-brand">Comparação entre setores</h2>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Comparação entre setores</h2>
+<app-info-tip label="a comparação entre setores" text="linha cinza = base 100 · setores suprimidos não entram nesta comparação" /></div>
 @for (b of vm.barrasSetor; track b.rot) {
 <div class="flex items-center gap-3">
 <span class="basis-[150px] flex-none text-xs text-secondary">{{ b.rot }}</span>
@@ -538,10 +541,10 @@
 <span class="flex-none text-right font-mono text-sm font-semibold basis-[68px]" style="color:{{ b.cor }}">{{ b.val }}</span>
 </div>
 }
-<span class="font-sans text-xs text-muted">linha cinza = base 100 · setores suprimidos não entram nesta comparação</span>
 </section>
 <section class="bg-white border rounded-lg p-5 flex-col gap-3">
-<h2 class="font-heading text-xl font-bold m-0 text-brand">Coorte por tempo de uso</h2>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Coorte por tempo de uso</h2>
+<app-info-tip label="as coortes"><span class="tip-line">AVISO DE LEITURA · FIXO NESTE BLOCO</span>A comparação de coortes sofre viés de seleção e não estabelece causalidade: quem adere primeiro tende a ser quem já tem gestão mais organizada. Estes números descrevem os participantes, não o efeito do programa, e não devem ser apresentados como prova de impacto.</app-info-tip></div>
 @for (b of vm.coortes; track b.rot) {
 <div class="flex items-center gap-3">
 <span class="basis-[132px] flex-none text-xs text-secondary">{{ b.rot }}</span>
@@ -549,10 +552,6 @@
 <span class="basis-[60px] flex-none text-right font-mono text-sm font-semibold">{{ b.val }}</span>
 </div>
 }
-<div class="bg-warning-light border border-warning-light border-l-4 border-l-warning flex-col gap-2 rounded-md p-4 mt-2">
-<span class="font-sans text-xs tracking-wider uppercase font-bold" style="color:var(--color-primary-dark)">AVISO DE LEITURA · FIXO NESTE BLOCO</span>
-<span class="text-warning-darkest text-sm leading-relaxed text-pretty">A comparação de coortes sofre viés de seleção e não estabelece causalidade: quem adere primeiro tende a ser quem já tem gestão mais organizada. Estes números descrevem os participantes, não o efeito do programa, e não devem ser apresentados como prova de impacto.</span>
-</div>
 </section>
 </div>
 </div>
@@ -560,21 +559,21 @@
 
 @if (vm.ehAdocao) {
 <div class="animate-fade-in flex-col gap-5">
-<div class="grid-cols-auto-210 card grid gap-0 overflow-hidden">
+<div class="summary-grid">
 @for (k of vm.adocaoKpis; track k.rot) {
-<div class="p-5 flex-col gap-2 border-r border-soft">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">{{ k.rot }}</span>
+<div class="summary-stat">
+<div class="section-heading justify-between"><span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">{{ k.rot }}</span>
+<app-info-tip [label]="k.rot" [text]="k.sub" /></div>
 <span class="font-mono text-4xl font-semibold leading-none text-brand">{{ k.valor }}</span>
 <div class="bg-border-soft h-1.5 rounded-sm overflow-hidden"><div class="h-full bg-brand origin-left animate-estica-fast" style="width:{{ k.barra }}%"></div></div>
-<span class="font-sans text-xs text-secondary">{{ k.sub }}</span>
 </div>
 }
 </div>
 <div class="trend-row">
 <section class="card p-5 flex-col gap-4">
 <div class="flex-col gap-1">
-<h2 class="font-heading text-xl font-bold m-0 text-brand">Cobertura e completude por setor</h2>
-<span class="text-xs text-secondary">onde falta busca ativa da equipe de campo · marca vermelha = limiar de 30%</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Cobertura e completude por setor</h2>
+<app-info-tip label="a cobertura e completude" text="onde falta busca ativa da equipe de campo · marca vermelha = limiar de 30%" /></div>
 </div>
 @for (s of vm.setoresView; track s.id) {
 <div class="flex-col gap-2 border-b border-soft pb-3">
@@ -592,8 +591,8 @@
 </section>
 <section class="card p-5 flex-col gap-4">
 <div class="flex-col gap-1">
-<h2 class="font-heading text-xl font-bold m-0 text-brand">Temas perguntados ao bot</h2>
-<span class="text-xs text-secondary">categorias fechadas · o conteúdo das conversas nunca é exibido</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Temas perguntados ao bot</h2>
+<app-info-tip label="os temas perguntados ao bot"><span class="tip-line">categorias fechadas · o conteúdo das conversas nunca é exibido</span>Alimenta a agenda de capacitação do trimestre. Precificação lidera desde abril — sugere oficina fixa no Mercado da Cidade.</app-info-tip></div>
 </div>
 @for (t of vm.temas; track t.rot) {
 <div class="flex-col gap-1">
@@ -601,7 +600,6 @@
 <div class="h-3.5 bg-surface-alt rounded-sm overflow-hidden"><div class="h-full rounded-sm origin-left animate-estica-fast" style="background:{{ t.cor }};width:{{ t.w }}%"></div></div>
 </div>
 }
-<span class="text-xs text-secondary leading-relaxed p-3 rounded-md bg-surface-alt">Alimenta a agenda de capacitação do trimestre. Precificação lidera desde abril — sugere oficina fixa no Mercado da Cidade.</span>
 </section>
 </div>
 </div>
@@ -609,16 +607,16 @@
 
 @if (vm.ehCadastro) {
 <div class="animate-fade-in flex-col gap-5">
-<div class="bg-brown-light border-brown-light flex items-center gap-4 flex-wrap p-4 rounded-md border">
+<div class="layer-notice layer-notice--registry">
 <span class="text-xs font-sans tracking-wider whitespace-nowrap px-3 py-1.5 rounded-sm uppercase" style="background:var(--color-primary-dark);color:white">CAMADA 2 · BASE CADASTRAL DO MUNICÍPIO</span>
-<span class="text-warning-darkest min-w-260 text-sm leading-relaxed flex-1">Dado próprio da administração, tratado sob execução de política pública. Nenhum dado financeiro do chatbot aparece nesta tela e nenhum caminho leva daqui ao desempenho de um permissionário.</span>
+<app-info-tip label="a base cadastral" text="Dado próprio da administração, tratado sob execução de política pública. Nenhum dado financeiro do chatbot aparece nesta tela e nenhum caminho leva daqui ao desempenho de um permissionário." />
 </div>
-<div class="grid-cols-auto-198 bg-warning-light border-warning-light grid gap-0 rounded-md overflow-hidden border">
+<div class="summary-grid">
 @for (k of vm.cadastroKpis; track k.rot) {
-<div class="border-warning-border p-5 flex-col gap-2 border-r">
-<span class="font-sans text-xs tracking-wider uppercase font-bold" style="color:var(--color-text-muted)">{{ k.rot }}</span>
+<div class="summary-stat">
+<div class="section-heading justify-between"><span class="font-sans text-xs tracking-wider uppercase font-bold" style="color:var(--color-text-muted)">{{ k.rot }}</span>
+<app-info-tip [label]="k.rot" [text]="k.sub" /></div>
 <span class="text-warning-darkest font-mono text-4xl font-semibold leading-none">{{ k.valor }}</span>
-<span class="font-sans text-xs" style="color:var(--color-text-primary)">{{ k.sub }}</span>
 </div>
 }
 </div>
@@ -630,7 +628,7 @@
 </div>
 <div class="px-5 pt-2 pb-4">
 @for (o of vm.ocupacao; track o.nome) {
-<div class="border-warning-border flex items-center gap-3 py-2 border-b">
+<div class="occupancy-row border-warning-border flex items-center gap-3 py-2 border-b">
 <span class="basis-[152px] text-warning-darkest flex-none text-sm">{{ o.nome }}</span>
 <div class="h-4 bg-brown-lighter flex-1 flex rounded-sm overflow-hidden">
 <span title="ocupados" class="bg-brown-dark origin-left animate-estica-faster" style="width:{{ o.pctOcup }}%"></span>
@@ -652,7 +650,7 @@
 <span class="badge badge--danger">41 no total</span>
 </div>
 @for (p of vm.pendencias; track p.nome) {
-<div class="border-warning-border flex justify-between items-center gap-3 border-b pb-2" [appHoverStyle]="'background:#F2EADA'">
+<div class="registry-row border-warning-border flex justify-between items-center gap-3 border-b pb-2" [appHoverStyle]="'background:var(--color-surface-alt)'">
 <span class="flex-col gap-1">
 <span class="text-warning-darkest text-sm font-medium">{{ p.nome }}</span>
 <span class="font-sans text-xs" style="color:var(--color-text-muted)">{{ p.box }} · {{ p.setor }}</span>
@@ -677,9 +675,9 @@
 
 @if (vm.ehProgramas) {
 <div class="animate-fade-in flex-col gap-5">
-<div class="bg-danger-light border-danger-light flex items-center gap-4 flex-wrap p-4 rounded-md border">
+<div class="layer-notice layer-notice--programs">
 <span class="text-xs font-sans tracking-wider whitespace-nowrap px-3 py-1.5 rounded-sm uppercase bg-danger text-white">CAMADA 3 · EXCEÇÃO COM OPT-IN</span>
-<span class="text-danger-dark min-w-260 text-sm leading-relaxed flex-1">Acesso individual apenas a quem optou por um programa, apenas durante a janela de análise, apenas pelo analista responsável. Todo acesso exige quebra-vidro, gera log e notifica o titular no WhatsApp.</span>
+<app-info-tip label="o acesso aos programas" text="Acesso individual apenas a quem optou por um programa, apenas durante a janela de análise, apenas pelo analista responsável. Todo acesso exige quebra-vidro, gera log e notifica o titular no WhatsApp." />
 </div>
 <div class="trend-row">
 <div class="flex-col gap-4 min-w-0">
@@ -720,7 +718,7 @@
 </div>
 }
 @if (p.foraEscopo) {
-<div class="bg-striped-green border-border flex items-center gap-3 border rounded-sm p-3 text-sm text-secondary"><span class="font-mono text-lg leading-none">⊘</span>Fila fora do seu escopo. O analista deste programa é o único perfil com acesso — solicite ao encarregado de dados se precisar atuar aqui.</div>
+<div class="bg-surface-muted border-border flex items-center gap-3 border rounded-sm p-3 text-sm text-secondary"><span class="font-mono text-lg leading-none">⊘</span>Fila fora do seu escopo.<app-info-tip label="a fila fora do escopo" text="O analista deste programa é o único perfil com acesso — solicite ao encarregado de dados se precisar atuar aqui." /></div>
 }
 </div>
 </section>
@@ -728,18 +726,18 @@
 </div>
 <aside class="flex-col gap-4">
 <div class="card p-5 flex-col gap-3">
-<span class="font-heading text-lg font-bold text-brand">Acessos neste mês</span>
+<div class="section-heading"><span class="font-heading text-lg font-bold text-brand">Acessos neste mês</span>
+<app-info-tip label="os acessos"><span>Todo acesso desta camada aparece no log de <a href="#" (click)="$event.preventDefault(); vm.irGovernanca()">Governança e privacidade</a> em tempo real.</span></app-info-tip></div>
 @for (a of vm.acessosMes; track a.rot) {
 <div class="flex justify-between items-baseline gap-3 border-b border-soft pb-2">
 <span class="text-sm text-secondary">{{ a.rot }}</span>
 <span class="font-mono text-xl font-semibold" style="color:{{ a.cor }}">{{ a.val }}</span>
 </div>
 }
-<span class="text-xs text-secondary leading-relaxed">Todo acesso desta camada aparece no log de <a href="#" (click)="$event.preventDefault(); vm.irGovernanca()">Governança e privacidade</a> em tempo real.</span>
 </div>
 <div class="bg-primary-dark text-on-dark rounded-md p-5 flex-col gap-2">
-<span class="font-heading text-lg font-bold">O que esta camada não faz</span>
-<span class="text-on-dark-soft text-xs leading-relaxed">Não existe tela, filtro ou exportação que mostre dado financeiro individual de quem não optou por um programa. Não há score, ranking nem classificação de risco de feirante.</span>
+<div class="section-heading"><span class="font-heading text-lg font-bold">O que esta camada não faz</span>
+<app-info-tip label="os limites desta camada" text="Não existe tela, filtro ou exportação que mostre dado financeiro individual de quem não optou por um programa. Não há score, ranking nem classificação de risco de feirante." /></div>
 </div>
 </aside>
 </div>
@@ -751,7 +749,7 @@
 <div class="trend-row">
 <section class="card overflow-hidden">
 <div class="p-4 border-b border-soft"><h2 class="font-heading text-xl font-bold m-0 text-brand">Inventário de dados</h2></div>
-<div class="table-container"><table class="table">
+<div class="table-container" tabindex="0" role="region" aria-label="Inventário de dados"><table class="table">
 <thead><tr>
 @for (h of vm.cabInv; track h) {
 <th >{{ h }}</th>
@@ -771,8 +769,8 @@
 </section>
 <section class="card p-5 flex-col gap-3">
 <div class="flex-col gap-1">
-<h2 class="font-heading text-xl font-bold m-0 text-brand">Regras de supressão ativas</h2>
-<span class="text-xs text-secondary">configuração legível, não código — vale para todas as telas agora</span>
+<div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Regras de supressão ativas</h2>
+<app-info-tip label="as regras de supressão"><span class="tip-line">configuração legível, não código — vale para todas as telas agora</span>Exportação limitada a recortes que passam pelas regras acima. Séries brutas e recortes individuais são bloqueados na origem.</app-info-tip></div>
 </div>
 @for (r of vm.regras; track r.rot) {
 <div class="border-b-dotted border-b-[#C9D0C2] flex justify-between items-baseline gap-3 pb-2">
@@ -781,7 +779,6 @@
 </div>
 }
 <button (click)="vm.exportar()" class="btn-primary w-full justify-between mt-1 transition-transform" [appHoverStyle]="'transform:translateY(-1px)'">Exportar dados abertos agregados (CSV)<span class="font-mono opacity-70">↓</span></button>
-<span class="text-xs text-muted leading-relaxed">Exportação limitada a recortes que passam pelas regras acima. Séries brutas e recortes individuais são bloqueados na origem.</span>
 </section>
 </div>
 <section class="card overflow-hidden">
@@ -793,7 +790,7 @@
 }
 </div>
 </div>
-<div class="table-container"><table class="table">
+<div class="table-container" tabindex="0" role="region" aria-label="Log de acessos"><table class="table">
 <thead><tr>
 @for (h of vm.cabLog; track h.rot) {
 <th >{{ h.rot }}</th>
@@ -828,9 +825,9 @@
 }
 </section>
 <aside class="bg-primary-dark text-on-dark flex-col gap-2 rounded-md p-5">
-<span class="font-heading text-lg font-bold">Encarregado de dados</span>
+<div class="section-heading"><span class="font-heading text-lg font-bold">Encarregado de dados</span>
+<app-info-tip label="o atendimento aos titulares" text="Atendimento a titulares também pelo próprio WhatsApp do serviço, com resposta em até 15 dias." /></div>
 <span class="text-on-dark-soft text-sm leading-relaxed">Raimundo Sousa Lima<br>Encarregado (DPO) · SEMAPA<br><span class="font-mono text-xs">dpo.semapa&#64;saoluis.ma.gov.br<br>(98) 3212-0000</span></span>
-<span class="text-on-dark-muted border-white/14 text-xs leading-relaxed border-t pt-2 mt-1">Atendimento a titulares também pelo próprio WhatsApp do serviço, com resposta em até 15 dias.</span>
 </aside>
 </div>
 </div>
@@ -873,6 +870,6 @@
 }
 
 @if (vm.toast) {
-<div class="toast"><span class="toast-icon"></span>{{ vm.toast }}</div>
+<div class="toast" role="status"><span class="toast-icon"></span>{{ vm.toast }}</div>
 }
 
