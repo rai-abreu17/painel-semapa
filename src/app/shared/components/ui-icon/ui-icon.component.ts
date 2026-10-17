@@ -32,5 +32,8 @@ export class UiIconComponent {
     lock: 'M5 10h14v11H5V10Z M8 10V6a4 4 0 0 1 8 0v4 M12 14v3',
     menu: 'M4 6h16 M4 12h16 M4 18h16',
     close: 'M6 6l12 12 M18 6 6 18',
+    'arrow-right': 'M5 12h14 M14 7l5 5-5 5',
+    table: 'M3 4h18v16H3V4Z M3 9h18 M9 9v11 M15 9v11 M3 14h18',
+    horizontal: 'M3 12h18 M7 8l-4 4 4 4 M17 8l4 4-4 4',
   };
 }

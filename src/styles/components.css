@@ -9,7 +9,7 @@ button, a, select, input, textarea { -webkit-tap-highlight-color: transparent; }
 button { touch-action: manipulation; }
 a { color: var(--color-action); text-decoration: none; }
 a:hover { color: var(--color-primary-dark); }
-:focus-visible { outline: 3px solid var(--color-action); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--color-action); outline-offset: 3px; }
 .font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.035em; }
 .font-sans { font-family: var(--font-body); }
 .font-heading { font-family: var(--font-heading); }
@@ -21,14 +21,14 @@ a:hover { color: var(--color-primary-dark); }
 .transition-all { transition: background-color .18s ease, box-shadow .18s ease; }
 
 .dashboard { display: flex; flex-direction: column; gap: 24px; width: 100%; min-width: 0;
-  max-width: 1664px; margin: 0 auto; padding: 0 var(--page-gutter) 48px; }
+  max-width: var(--content-max-width); margin: 0 auto; padding: 0 var(--page-gutter) 48px; }
 .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 .trend-row { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .trend-row > * { min-width: 0; }
 .trend-row__main, .trend-row__side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .activity-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 .analytic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-.card, .panel-detail { background: var(--color-surface-card); border: 1px solid var(--color-border-soft);
+.card, .panel-detail { background: var(--color-surface-card); border: 1px solid var(--color-border);
   border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
 .card { min-width: 0; }
 .panel-detail { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
@@ -57,7 +57,7 @@ button:disabled { cursor: not-allowed; }
   min-height: 34px; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); cursor: pointer;
   transition: background-color .18s ease, color .18s ease; }
 .btn-filter:hover { color: var(--color-primary-dark); background: var(--color-primary-light); }
-.btn-filter.active { background: var(--color-action); color: white; box-shadow: var(--shadow-sm); }
+.btn-filter.active { background: var(--color-surface-card); color: var(--color-primary-dark); box-shadow: var(--shadow-sm); }
 .form-select, .form-textarea { display: block; width: 100%; min-height: 42px; padding: 10px 12px;
   border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: white;
   color: var(--color-text-primary); font: 400 12px/1.6 var(--font-body); transition: border-color .18s, box-shadow .18s; }
@@ -79,11 +79,12 @@ button:disabled { cursor: not-allowed; }
 .table-container { width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-md); background: white; }
 .card > .table-container { border: 0; border-radius: 0; }
-.table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
 .table th { padding: 13px 16px; background: var(--color-surface); color: var(--color-text-secondary);
   border-bottom: 1px solid var(--color-border-soft); font-size: 10px; font-weight: 600; letter-spacing: .035em;
   text-align: left; white-space: nowrap; }
 .table td { padding: 15px 16px; border-bottom: 1px solid var(--color-border-soft); color: var(--color-text-primary); vertical-align: middle; }
+.table td:first-child { min-width: 150px; }
 .table tr:last-child td { border-bottom: 0; }
 .table tbody tr { transition: background-color .15s; }
 .table tbody tr:hover { background: var(--color-surface-muted); }

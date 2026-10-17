@@ -7,7 +7,7 @@ import { InfoTipComponent } from '../info-tip/info-tip.component';
   standalone: true,
   imports: [UiIconComponent, InfoTipComponent],
   template: `
-    <div class="kpi-card" [class]="tone">
+    <article class="kpi-card" [class]="tone" [attr.aria-label]="title">
       <div class="kpi-card__header">
         <span class="kpi-card__icon"><app-ui-icon [name]="icon || (tone === 'danger' ? 'chart' : tone === 'primary' ? 'records' : 'people')" /></span>
         <span class="kpi-card__title">{{ title }}</span>
@@ -34,10 +34,13 @@ import { InfoTipComponent } from '../info-tip/info-tip.component';
             <span class="lbl">{{ secondaryLabel }}</span>
           </div>
         }
+        @if (deltaPct) {
+          <span class="kpi-card__delta">{{ deltaPct }}</span>
+        }
       </div>
 
-      @if (deltaPct) {
-        <span class="kpi-card__delta">{{ deltaPct }}</span>
+      @if (sub) {
+        <p class="kpi-card__context">{{ sub }}</p>
       }
 
       @if (sparkline) {
@@ -57,7 +60,7 @@ import { InfoTipComponent } from '../info-tip/info-tip.component';
          </div>
       }
       
-    </div>
+    </article>
   `,
   styleUrl: './kpi-stat-card.component.css',
 })

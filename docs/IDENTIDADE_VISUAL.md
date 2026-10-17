@@ -1,42 +1,60 @@
-# Identidade visual do painel SEMAPA
+﻿# Identidade visual do Painel SEMAPA
 
-O redesign aproveita das referências as superfícies claras, a navegação leve e a hierarquia de informações. A identidade mantém o azul institucional do SEMAPA, com verde, âmbar e vermelho reservados aos estados dos dados. Textos, números e regras continuam vindo do modelo existente em `dashboard.store.ts`, que não foi alterado.
+## Diagnóstico
 
-## Organização dos estilos
+A inspeção do site publicado e dos componentes locais foi feita antes das alterações. Os principais problemas encontrados foram:
 
-- `src/styles/tokens.css`: paleta, fontes, espaçamentos, controles, bordas, raios, sombras e camadas.
-- `src/styles/components.css`: botões, formulários, tabelas, cards, modais e feedback.
-- `src/styles/shell.css`: navegação, cabeçalho e composição das telas.
-- `src/styles/filters.css`: barra de filtros e adaptação à largura disponível.
-- `src/styles/utilities.css`: vocabulário de classes já utilizado pelo projeto.
+- Contexto da página e informações auxiliares dos KPIs disponíveis apenas em tooltips.
+- Rótulos pequenos, pesos tipográficos concorrentes e valores desalinhados entre indicadores.
+- Superfícies, bordas e espaçamentos diferentes na planta e no detalhe do setor.
+- Grandes áreas de cor na planta competindo com os dados; separadores pontilhados e controles com pesos visuais distintos.
+- Alertas independentes com três ações primárias visualmente concorrentes.
+- Nome, status e explicação das restrições comprimidos na mesma linha.
+- No mobile, rótulos sobrepostos no gráfico de impacto, tabelas com colunas comprimidas e contagens do histograma muito próximas.
 
-Os arquivos são importados por `src/styles.css`. Os indicadores mantêm estilos locais no componente. Nenhuma dependência foi adicionada.
+Foram preservados a organização da navegação, os segmentos de filtros, o mapa de setores, a representação listrada dos dados suprimidos e o mecanismo existente de tooltips.
 
-## Padrões de interface
+## Direção visual
 
-Cards brancos têm bordas suaves e sombras discretas. Os indicadores usam cor nos ícones, números semânticos e barras, evitando grandes fundos em gradiente. A navegação mantém um destaque azul para a página atual. As tabelas preservam todos os campos e permitem rolagem horizontal local quando necessário.
+A identidade mantém o azul institucional, com superfícies neutras e cores semânticas reservadas aos estados dos dados. Inter passa a organizar títulos e textos; números recebem algarismos tabulares. A família monoespaçada existente continua disponível para séries, tabelas e informações técnicas.
 
-Explicações e critérios de leitura ficam no componente `InfoTipComponent`, junto ao título correspondente. O botão “i” abre com foco, cursor ou toque; o clique mantém o conteúdo aberto, e Escape ou clique externo o fecha. Os textos de confirmação do acesso restrito permanecem no modal.
+Os quatro KPIs compartilham uma superfície dividida, com valores alinhados, contexto visível e barras de 3 px. A planta e o detalhe formam um módulo único. As cores da planta passam a ocupar fundos suaves e marcas laterais, preservando a associação entre métrica, cor e setor. Os estados suprimidos continuam listrados.
 
-O modal contém o foco, fecha com Escape e devolve o foco ao controle de origem. A navegação móvel também contém o foco e mantém os itens ocultos fora da ordem de tabulação. Há indicação de foco, link para pular ao conteúdo e redução de animações conforme a preferência do dispositivo.
+Os alertas são linhas de uma lista, com prioridade discreta, justificativa expansível e ação contextual. Os cards de restrição mostram nome, estado, orientação e progresso. A justificativa completa de privacidade continua no tooltip correspondente.
 
-## Filtros
+## Organização
 
-`DashboardFiltersComponent` organiza os controles existentes por projeção de conteúdo, preservando seus eventos e valores. Os segmentos selecionados usam superfície branca, borda discreta e texto azul. O setor selecionado recebe destaque suave.
+- `src/styles/tokens.css`: cores, fontes, espaçamentos, raios, controles, largura máxima e camadas.
+- `src/styles/components.css`: primitivas compartilhadas de botões, cards, tabelas, formulários e modais.
+- `src/styles/shell.css`: navegação, cabeçalho, composição global e adaptações das telas de análise.
+- `src/styles/filters.css`: toolbar integrada, segmentos, seleção de setor e chips.
+- `src/styles/overview.css`: KPIs agrupados, planta, detalhe, alertas e restrições.
+- `kpi-stat-card.component.css`: tipografia e composição interna de cada indicador.
 
-A distribuição responde à largura real do painel por container queries: horizontal no desktop, rótulos acima dos controles em larguras intermediárias e três linhas integradas no celular. Os controles móveis têm aproximadamente 44 px de altura.
+## Responsividade e acessibilidade
 
-Filtros adicionais aparecem como chips removíveis. “Limpar filtros” só aparece quando existem chips e chama as mesmas ações de remoção já existentes: restaura período, setor e completude aos padrões, preservando o mercado escolhido como contexto.
+A largura máxima é de 1560 px, com navegação fixa no desktop e menu móvel existente abaixo de 1024 px. Os filtros respondem à largura real do componente por container queries. Os KPIs se reorganizam em duas colunas e o detalhe do setor passa para baixo da planta em telas intermediárias.
 
-## Validação realizada
+A geometria da planta é preservada. Em telas estreitas, a rolagem fica restrita ao mapa, com indicação de gesto e a alternativa existente de tabela. Tabelas mantêm uma largura mínima legível e rolam dentro de suas próprias regiões. Os marcos do gráfico de impacto aparecem em uma lista no celular para impedir sobreposição.
 
-- Build de produção aprovado, sem avisos de orçamento ou compilação.
-- Oito telas verificadas em 320, 390, 768, 1024, 1440 e 1920 px, sem transbordamento horizontal da página.
-- Filtros de mercado, período e setor, chips, limpeza e seleção por teclado verificados.
-- Planta, alternância de métricas, tabela de setores, alertas e navegação com filtro verificados.
-- Seleção de produto por teclado e ordenação da tabela verificadas.
-- Tooltips, foco do menu e comportamento de Escape verificados.
-- Modal verificado com justificativa inválida e válida, retorno de foco, confirmação e atualização do log local.
-- Filtros do log e feedback existente de exportação verificados.
+Foram mantidos link para pular ao conteúdo, foco visível, redução de movimento, contenção e retorno de foco do menu e do modal. Seleção da métrica e do setor na planta usa `aria-pressed`; controles expansíveis informam `aria-expanded` e `aria-controls`. Barras de cobertura e restrição têm descrição acessível dos valores, sem depender de cor.
 
-As verificações de interação foram realizadas no navegador local. A lógica e os comportamentos de integração existentes foram preservados.
+O texto secundário usa `#56667a` e o texto de apoio `#5f6f82`, com contraste mínimo de 4,5:1 nas superfícies neutras utilizadas. Estados de hover, foco, seleção e desabilitado usam as primitivas compartilhadas.
+
+## Escopo preservado
+
+Nenhuma alteração foi feita em `dashboard.store.ts`, serviços, configuração de rotas, contratos, cálculos, estrutura dos dados, regras de supressão ou eventos de negócio. As coordenadas, dimensões e ações dos setores continuam vindo do mesmo view model. Nenhuma dependência foi adicionada.
+
+## Verificação
+
+- Build de produção sem erros nem avisos de orçamento.
+- 98 verificações automatizadas de interface aprovadas, sem erros JavaScript no navegador.
+- Oito telas verificadas em 320, 390, 768, 1024, 1280, 1440 e 1920 px, sem rolagem horizontal da página.
+- Os dois mercados e as três métricas da planta verificados, com oito setores e sem sobreposição interna dos textos.
+- Seleção e remoção de setor pela planta, atualização do detalhe por foco, dropdown, períodos, chips e limpeza de filtros verificados.
+- Tabela da planta, três justificativas dos alertas e navegação com os filtros existentes verificados.
+- Seleção de produto por teclado, tooltip de privacidade, Escape e contenção de foco do menu móvel verificados.
+- Modal de acesso restrito verificado no celular: abertura, bloqueio sem justificativa, largura, contenção de foco, fechamento por Escape e retorno de foco.
+- Revisão visual das oito telas em desktop e celular, além das larguras intermediárias da visão geral.
+
+O projeto não possui uma suíte de testes unitários. A validação funcional foi feita com verificações automatizadas no navegador local, além da compilação Angular. Capturas e relatórios desta revisão ficam em `tmp/redesign`, diretório ignorado pelo Git.
