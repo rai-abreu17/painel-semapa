@@ -26,22 +26,22 @@
             <div class="mb-4">
             <span class="nav-group-label">{{ g.rot }}</span>
             @for (it of g.itens; track it.nome) {
-                <button (click)="navigate(it.go)" class="app-sidebar__item w-full rounded-md mt-1" [class.active]="it.active" [attr.aria-current]="it.active ? 'page' : null">
+                <button (click)="navigate(it.go)" class="app-sidebar__item w-full rounded-md mt-1" [class.active]="it.active" [attr.aria-current]="it.active ? 'page' : null" [title]="it.nome">
                     <app-ui-icon [name]="it.nome" />
                     <span class="flex-1 font-sans text-sm">{{ it.nome }}</span>
                     @if (it.badge) {
-                        <span class="nav-badge">{{ it.badge }}</span>
+                        <span class="nav-badge" [attr.aria-label]="it.badge + ' alertas'" [title]="it.badge + ' alertas'">{{ it.badge }}</span>
                     }
                 </button>
             }
             </div>
         }
-        <div class="sidebar-profile mt-auto mb-2 pt-4 border-t">
+        <div class="sidebar-profile mb-2 pt-4 border-t">
             <div class="flex items-center gap-3 px-2">
                 <div class="avatar-circle flex items-center justify-center rounded-full font-bold text-sm">AV</div>
                 <div class="flex-col text-left">
                    <span class="font-sans font-semibold text-sm text-primary">Ana Vasconcelos</span>
-                   <span class="font-sans text-xs text-muted">Sessão Auditada</span>
+                   <span class="font-sans text-xs text-muted">Perfil de gestão</span>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@
             </button>
             <!-- Logo para mobile -->
             <div class="mobile-only font-heading text-lg font-bold text-brand leading-tight">SEMAPA</div>
-            <span class="header-breadcrumb desktop-only">{{ vm.camada.trilha }}</span>
+            <span class="header-breadcrumb desktop-only">SEMAPA · Inteligência de Mercados</span>
         </div>
         <div class="header-session"><span class="session-dot"></span>Sessão Auditada<app-ui-icon name="lock" /></div>
     </header>
@@ -68,43 +68,58 @@
         </div>
         <div class="access-badge" [style.--access-color]="vm.selo.dot" [style.--access-bg]="vm.selo.bg">
             <app-ui-icon name="lock" />
-            <strong>{{ vm.selo.nivel }}</strong>
-            <app-info-tip [label]="vm.selo.nivel" [text]="vm.selo.texto" />
+            <strong>{{ vm.selo.nivel.charAt(0) + vm.selo.nivel.slice(1).toLowerCase() }}</strong>
+            <span class="access-badge__description">{{ vm.selo.texto }}</span>
+            @if (vm.ehCadastro) {
+              <app-info-tip label="a base cadastral" text="Dado próprio da administração, tratado sob execução de política pública. Nenhum dado financeiro do chatbot aparece nesta tela e nenhum caminho leva daqui ao desempenho de um permissionário." />
+            } @else if (vm.ehProgramas) {
+              <app-info-tip label="o acesso aos programas" text="Acesso individual apenas a quem optou por um programa, apenas durante a janela de análise, apenas pelo analista responsável. Todo acesso exige quebra-vidro, gera log e notifica o titular no WhatsApp." />
+            } @else {
+              <app-info-tip [label]="vm.selo.nivel" [text]="vm.selo.texto" />
+            }
         </div>
     </section>
 
     <div class="filters-region">
 
-<app-dashboard-filters [hasActiveFilters]="vm.chips.length > 0" (reset)="clearAdditionalFilters()">
+<app-dashboard-filters [hasActiveFilters]="vm.chips.length > 0" [activeCount]="vm.chips.length"
+    [compact]="compactViewport()" (reset)="clearAdditionalFilters()">
+    <span filterSummary class="filter-summary__text">
+        <strong>{{ vm.st.mercado === 'definitivo' ? 'Mercado Central' : 'Mercado da Cidade' }}</strong>
+        <span>{{ vm.st.periodo === '30d' ? '30 dias' : vm.st.periodo === '12s' ? '12 semanas' : 'Ano' }} ·
+            @if (!vm.setorSel) { Todos os setores }
+            @for (chip of vm.chips; track chip.k) { @if (chip.k === 'SETOR') { {{ chip.v }} } }
+        </span>
+    </span>
     <!-- Mercado Group -->
-    <div filterControl class="filter-group filter-group--market">
+    <div filterControl class="filter-group filter-group--market" [class.filter-group--changed]="vm.st.mercado !== 'provisorio'">
         <span class="filter-label" id="market-label">Mercado</span>
-        <div class="filter-segment" role="group" aria-labelledby="market-label">
+        <app-segmented-control labelledBy="market-label">
             @for (m of vm.mercadosOpt; track m.nome) {
-            <button class="filter-segment__option" [class.active]="m.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="m.bg === 'var(--color-primary-dark)'" (click)="m.go()">
+            <button class="segmented-option" [class.active]="m.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="m.bg === 'var(--color-primary-dark)'" (click)="m.go()">
                 {{ m.nome }}
             </button>
             }
-        </div>
+        </app-segmented-control>
     </div>
 
     <!-- Período Group -->
-    <div filterControl class="filter-group filter-group--period">
+    <div filterControl class="filter-group filter-group--period" [class.filter-group--changed]="vm.st.periodo !== '30d'">
         <span class="filter-label" id="period-label">Período</span>
-        <div class="filter-segment" role="group" aria-labelledby="period-label">
+        <app-segmented-control labelledBy="period-label">
             @for (p of vm.periodosOpt; track p.rot) {
-            <button class="filter-segment__option" [class.active]="p.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="p.bg === 'var(--color-primary-dark)'" (click)="p.go()">
-                {{ p.rot }}
+            <button class="segmented-option" [class.active]="p.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="p.bg === 'var(--color-primary-dark)'" (click)="p.go()">
+                {{ p.rot === 'ANO' ? 'Ano' : p.rot.toLowerCase() }}
             </button>
             }
-        </div>
+        </app-segmented-control>
     </div>
 
     <!-- Setor Select -->
-    <div filterControl class="filter-group filter-group--sector">
+    <div filterControl class="filter-group filter-group--sector" [class.filter-group--changed]="vm.setorSel !== ''">
         <label class="filter-label" for="sector-filter">Setor</label>
         <select id="sector-filter" class="filter-select" [class.filter-select--active]="vm.setorSel !== ''" [value]="vm.setorSel" (change)="vm.setSetor($event)">
-            <option value="">Todas as localizações / setores</option>
+            <option value="">Todos os setores</option>
             @for (s of vm.setores; track s.id) {<option [value]="s.id">{{ s.nome }}</option>}
         </select>
     </div>
@@ -157,11 +172,11 @@
 <p>{{ vm.plantaSub }}</p>
 </div>
 <div class="plan-toolbar">
-<div class="btn-group" role="group" aria-label="Métrica da planta">
+<app-segmented-control label="Métrica da planta">
 @for (m of vm.metricasOpt; track m.rot) {
-<button class="btn-filter" (click)="m.go()" title="{{ m.dica }}" [class.active]="m.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="m.bg === 'var(--color-primary-dark)'">{{ m.rot }}</button>
+<button class="segmented-option" (click)="m.go()" title="{{ m.dica }}" [class.active]="m.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="m.bg === 'var(--color-primary-dark)'">{{ m.rot }}</button>
 }
-</div>
+</app-segmented-control>
 <button class="btn-secondary plan-data-button" (click)="vm.toggleTabelaPlanta()" [attr.aria-expanded]="vm.tabelaPlanta" aria-controls="plan-data"><app-ui-icon name="table" />{{ vm.labelTabelaPlanta }}</button>
 </div>
 </div>
@@ -268,7 +283,7 @@
 <h3>{{ a.titulo }}</h3>
 <p>{{ a.nota }}</p>
 </div>
-<span class="decision-alert__priority">{{ a.prioridade }}</span>
+<span class="decision-alert__priority">{{ a.prioridade.charAt(0) + a.prioridade.slice(1).toLocaleLowerCase('pt-BR') }}</span>
 <div class="decision-alert__actions">
 <button class="btn-ghost" (click)="a.expandir()" [attr.aria-expanded]="a.aberto" [attr.aria-controls]="'alert-evidence-' + a.id">{{ a.rotExp }}</button>
 <button class="btn-secondary" (click)="a.go()">Abrir com filtro<app-ui-icon name="arrow-right" /></button>
@@ -305,7 +320,7 @@
 <h3>{{ s.nome }}</h3>
 <app-info-tip [label]="s.nome"><span class="tip-line">{{ s.explica }}</span>{{ s.acao }}</app-info-tip>
 </div>
-<span class="restriction-card__status">{{ s.tag }}</span>
+<span class="restriction-card__status">{{ s.tag.charAt(0) + s.tag.slice(1).toLocaleLowerCase('pt-BR') }}</span>
 <p>{{ s.acao }}</p>
 <div class="restriction-card__progress">
 <div class="restriction-card__progress-label"><span>{{ s.progRot }}</span><strong>{{ s.progVal }}</strong></div>
@@ -391,8 +406,11 @@
 <span class="absolute text-muted bg-white font-mono left-0 -translate-y-1/2 text-[9.5px] pr-1" style="top:{{ g.topPct }}%">{{ g.rot }}</span>
 }
 @for (e of vm.serieEventos; track $index) {
-<span class="absolute font-mono whitespace-nowrap rounded-sm top-0 -translate-x-1/2 text-[9.5px] text-warning-darker bg-warning-light-alt px-1.5 py-0.5" style="left:{{ e.leftPct }}%">{{ e.rot }}</span>
+<span class="price-event-label absolute font-mono whitespace-nowrap rounded-sm top-0 -translate-x-1/2 text-[9.5px] text-warning-darker bg-warning-light-alt px-1.5 py-0.5" style="left:{{ e.leftPct }}%">{{ e.rot }}</span>
 }
+</div>
+<div class="price-event-list" aria-label="Marcos da série de preços">
+@for (e of vm.serieEventos; track $index) { <span>{{ e.rot }}</span> }
 </div>
 </section>
 
@@ -418,12 +436,12 @@
 </div>
 <div class="h-[34px] flex rounded-md overflow-hidden border">
 @for (o of vm.origem; track o.rot) {
-<span title="{{ o.rot }} · {{ o.pct }}%" class="flex items-center justify-center font-mono text-xs font-semibold text-white" style="width:{{ o.pct }}%;background:{{ o.cor }};transform-origin:left;animation:estica .6s cubic-bezier(.2,.7,.3,1) both">{{ o.pct }}%</span>
+<span title="{{ o.rot }} · {{ o.pct }}%" class="flex items-center justify-center text-xs font-semibold text-white" [style.width.%]="o.pct" [style.background]="$index === 0 ? 'var(--color-primary-dark)' : $index === 1 ? 'var(--color-chart-2)' : 'var(--color-chart-3)'">{{ o.pct }}%</span>
 }
 </div>
-<div class="flex gap-4 flex-wrap">
+<div class="price-origin-legend">
 @for (o of vm.origem; track o.rot) {
-<span class="inline-flex items-center gap-2 text-xs text-secondary"><span class="block rounded-sm w-2.5 h-2.5" style="background:{{ o.cor }}"></span>{{ o.rot }}</span>
+<span class="inline-flex items-center gap-2 text-xs text-secondary"><span class="block rounded-sm w-2.5 h-2.5" [style.background]="$index === 0 ? 'var(--color-primary-dark)' : $index === 1 ? 'var(--color-chart-2)' : 'var(--color-chart-3)'"></span>{{ o.rot }}</span>
 }
 </div>
 </section>
@@ -432,12 +450,12 @@
 }
 
 @if (vm.ehSaude) {
-<div class="flex-col gap-5 animate-sobe">
-<div class="trend-row">
-<section class="bg-primary-pattern text-on-dark rounded-md p-6 flex-col gap-3 justify-center">
+<div class="health-layout flex-col gap-6">
+<div class="trend-row health-summary">
+<section class="health-hero card p-6 flex-col gap-3 justify-center">
 <div class="section-heading"><span class="text-on-dark-soft text-sm">Operando com margem negativa</span>
 <app-info-tip label="a margem negativa"><span class="tip-line">O NÚMERO MAIS ACIONÁVEL DO PAINEL</span>17 de 121 feirantes participantes com margem mediana abaixo de zero no período.</app-info-tip></div>
-<span class="text-7xl text-warning-amber font-mono font-semibold leading-none">14%</span>
+<span class="health-hero__value font-semibold leading-none">14%</span>
 <div class="h-2.5 bg-white/12 flex rounded-sm overflow-hidden">
 <span class="w-[14%] origin-left animate-estica bg-danger"></span>
 <span class="w-[86%] bg-white/22"></span>
@@ -454,8 +472,8 @@
 <div class="margin-histogram h-[196px] flex items-end gap-3">
 @for (h of vm.histograma; track h.rot) {
 <div title="{{ h.dica }}" class="cursor-default flex-1 flex-col justify-end items-center gap-2 h-full">
-<span class="font-mono text-sm font-semibold" style="color:{{ h.cor }}">{{ h.pct }}%</span>
-<div class="w-full rounded-t-sm origin-bottom animate-cresce transition-filter" style="background:{{ h.cor }};height:{{ h.h }}px" [appHoverStyle]="'filter:brightness(1.12)'"></div>
+<span class="font-mono text-sm font-semibold" [style.color]="$first ? 'var(--color-danger)' : 'var(--color-primary-dark)'">{{ h.pct }}%</span>
+<div class="w-full rounded-t-sm" [style.background]="$first ? 'var(--color-danger)' : 'var(--color-primary-dark)'" [style.height.px]="h.h"></div>
 <span class="text-xs text-secondary text-center leading-tight">{{ h.rot }}</span>
 <span class="margin-histogram__count">{{ h.abs }}</span>
 </div>
@@ -464,18 +482,18 @@
 </section>
 </div>
 
-<div class="grid-cols-auto-238 grid gap-4">
+<div class="maturity-grid grid">
 @for (m of vm.maturidade; track m.rot) {
-<div class="card p-4 flex gap-3 items-center">
+<div class="maturity-card card p-4">
 <svg viewBox="0 0 44 44" class="w-13 h-13 flex-none">
 <circle cx="22" cy="22" r="18" fill="none" stroke="var(--color-border-soft)" stroke-width="6"></circle>
-<circle cx="22" cy="22" r="18" fill="none" attr.stroke="{{ m.cor }}" stroke-width="6" stroke-linecap="round" pathLength="1" attr.stroke-dasharray="{{ m.dash }}" transform="rotate(-90 22 22)"></circle>
+<circle cx="22" cy="22" r="18" fill="none" stroke="var(--color-primary-dark)" stroke-width="6" stroke-linecap="round" pathLength="1" attr.stroke-dasharray="{{ m.dash }}" transform="rotate(-90 22 22)"></circle>
 </svg>
 <span class="flex-col gap-1 min-w-0">
 <span class="font-mono text-2xl font-semibold leading-none text-brand">{{ m.pct }}%</span>
 <span class="text-xs text-secondary leading-tight">{{ m.rot }}</span>
-<app-info-tip [label]="m.rot" [text]="m.nota" />
 </span>
+<app-info-tip [label]="m.rot" [text]="m.nota" />
 </div>
 }
 </div>
@@ -495,9 +513,9 @@
 @for (s of vm.setoresView; track s.id) {
 <tr [appHoverStyle]="'background:var(--color-surface-alt)'">
 <td >{{ s.nome }}</td>
-<td >{{ s.faixa }}</td>
-<td >{{ s.margemTxt }}</td>
-<td >{{ s.varTxt }}</td>
+<td [class.cell-empty]="s.faixa === '—'">{{ s.faixa }}</td>
+<td [class.cell-empty]="s.margemTxt === '—'">{{ s.margemTxt }}</td>
+<td [class.cell-empty]="s.varTxt === '—'">{{ s.varTxt }}</td>
 <td >{{ s.nota }}</td>
 </tr>
 }
@@ -515,12 +533,9 @@
 <div class="section-heading"><h2 class="font-heading text-xl font-bold m-0 text-brand">Índice de movimento agregado · 24 semanas</h2>
 <app-info-tip label="o índice de movimento"><span class="tip-line">A TELA QUE VAI AO GABINETE, AO MP E À IMPRENSA</span>base 100 · coorte fixa · n = 121 feirantes participantes</app-info-tip></div>
 </div>
-<div class="flex gap-4 flex-wrap">
+<div class="impact-summary">
 @for (r of vm.impactoResumo; track r.rot) {
-<span class="flex-col gap-1 pl-3 border-l-3" style="border-left-color:{{ r.cor }}">
-<span class="font-mono text-xs tracking-wide text-muted">{{ r.rot }}</span>
-<span class="font-mono text-lg font-semibold" style="color:{{ r.cor }}">{{ r.val }}</span>
-</span>
+<app-kpi-stat-card [title]="r.rot" [value]="r.val" [compact]="true" />
 }
 </div>
 </div>
@@ -583,12 +598,7 @@
 <div class="animate-fade-in flex-col gap-5">
 <div class="summary-grid">
 @for (k of vm.adocaoKpis; track k.rot) {
-<div class="summary-stat">
-<div class="section-heading justify-between"><span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">{{ k.rot }}</span>
-<app-info-tip [label]="k.rot" [text]="k.sub" /></div>
-<span class="font-mono text-4xl font-semibold leading-none text-brand">{{ k.valor }}</span>
-<div class="bg-border-soft h-1.5 rounded-sm overflow-hidden"><div class="h-full bg-brand origin-left animate-estica-fast" style="width:{{ k.barra }}%"></div></div>
-</div>
+<app-kpi-stat-card [title]="k.rot" [value]="k.valor" [hint]="k.sub" icon="records" />
 }
 </div>
 <div class="trend-row">
@@ -603,11 +613,11 @@
 <span class="font-medium">{{ s.nome }}</span>
 <span class="font-mono text-secondary">{{ s.cobLinha }}</span>
 </div>
-<div class="h-3.5 bg-surface-alt relative rounded-sm overflow-hidden">
+<div class="coverage-sector-row__bar h-3.5 bg-surface-alt relative rounded-sm">
 <div class="absolute h-full rounded-sm left-0 top-0 origin-left animate-estica-fast" style="background:{{ s.cobCor }};width:{{ s.cobPct }}%"></div>
-<span class="absolute inset-y-0 left-[30%] absolute w-px bg-danger"></span>
-<span class="absolute inset-y-0 right-1.5 text-[10px] absolute flex items-center font-mono text-xs text-secondary">completude {{ s.completude }}%</span>
+<span class="coverage-threshold absolute inset-y-0 left-[30%] bg-danger"></span>
 </div>
+<span class="coverage-completeness text-xs text-secondary">completude {{ s.completude }}%</span>
 </div>
 }
 </section>
@@ -619,7 +629,7 @@
 @for (t of vm.temas; track t.rot) {
 <div class="flex-col gap-1">
 <div class="flex justify-between text-sm"><span>{{ t.rot }}</span><span class="font-mono font-semibold">{{ t.pct }}%</span></div>
-<div class="h-3.5 bg-surface-alt rounded-sm overflow-hidden"><div class="h-full rounded-sm origin-left animate-estica-fast" style="background:{{ t.cor }};width:{{ t.w }}%"></div></div>
+<div class="h-3.5 bg-surface-alt rounded-sm overflow-hidden"><div class="h-full rounded-sm bg-primary-dark" [style.width.%]="t.w"></div></div>
 </div>
 }
 </section>
@@ -629,20 +639,12 @@
 
 @if (vm.ehCadastro) {
 <div class="animate-fade-in flex-col gap-5">
-<div class="layer-notice layer-notice--registry">
-<span class="text-xs font-sans tracking-wider whitespace-nowrap px-3 py-1.5 rounded-sm uppercase" style="background:var(--color-primary-dark);color:white">CAMADA 2 · BASE CADASTRAL DO MUNICÍPIO</span>
-<app-info-tip label="a base cadastral" text="Dado próprio da administração, tratado sob execução de política pública. Nenhum dado financeiro do chatbot aparece nesta tela e nenhum caminho leva daqui ao desempenho de um permissionário." />
-</div>
 <div class="summary-grid">
 @for (k of vm.cadastroKpis; track k.rot) {
-<div class="summary-stat">
-<div class="section-heading justify-between"><span class="font-sans text-xs tracking-wider uppercase font-bold" style="color:var(--color-text-muted)">{{ k.rot }}</span>
-<app-info-tip [label]="k.rot" [text]="k.sub" /></div>
-<span class="text-warning-darkest font-mono text-4xl font-semibold leading-none">{{ k.valor }}</span>
-</div>
+<app-kpi-stat-card [title]="k.rot" [value]="k.valor" [hint]="k.sub" icon="records" />
 }
 </div>
-<div class="trend-row">
+<div class="registry-layout">
 <section class="bg-warning-light border-warning-light card overflow-hidden">
 <div class="border-warning-border p-5 border-b flex justify-between items-baseline gap-3">
 <h2 class="text-warning-darkest font-heading text-xl font-bold m-0">Ocupação de boxes por setor</h2>
@@ -665,7 +667,7 @@
 </div>
 </div>
 </section>
-<div class="flex-col gap-5">
+<div class="registry-side">
 <section class="bg-warning-light border-warning-light card p-5 flex-col gap-3">
 <div class="flex justify-between items-baseline gap-3">
 <h2 class="text-warning-darkest font-heading text-xl font-bold m-0">Permissionários com pendência</h2>
@@ -681,7 +683,7 @@
 </div>
 }
 </section>
-<section class="bg-warning-light border-warning-light card p-5 flex-col gap-3">
+<section class="registry-history bg-warning-light border-warning-light card p-5 flex-col gap-3">
 <h2 class="text-warning-darkest font-heading text-xl font-bold m-0">Histórico de transferência de box</h2>
 @for (t of vm.transferencias; track t.txt) {
 <div class="border-warning-border flex justify-between items-center gap-3 text-sm border-b pb-2">
@@ -697,25 +699,20 @@
 
 @if (vm.ehProgramas) {
 <div class="animate-fade-in flex-col gap-5">
-<div class="layer-notice layer-notice--programs">
-<span class="text-xs font-sans tracking-wider whitespace-nowrap px-3 py-1.5 rounded-sm uppercase bg-danger text-white">CAMADA 3 · EXCEÇÃO COM OPT-IN</span>
-<app-info-tip label="o acesso aos programas" text="Acesso individual apenas a quem optou por um programa, apenas durante a janela de análise, apenas pelo analista responsável. Todo acesso exige quebra-vidro, gera log e notifica o titular no WhatsApp." />
-</div>
 <div class="trend-row">
 <div class="flex-col gap-4 min-w-0">
 @for (p of vm.programas; track p.id) {
-<section class="card overflow-hidden" style="border-color:{{ p.br }}">
-<div class="h-[3px]" style="background:{{ p.acc }}"></div>
+<section class="program-card card overflow-hidden" [class.program-card--in-scope]="p.podeVer" [class.program-card--out-of-scope]="p.foraEscopo">
 <div class="p-5 flex-col gap-4">
 <div class="flex justify-between gap-4 flex-wrap items-start">
 <div class="flex-col gap-1">
 <span class="font-heading text-xl font-bold text-brand">{{ p.nome }}</span>
-<span class="inline-flex items-center gap-2 font-mono text-xs" style="color:{{ p.acc }}"><span class="block w-2 h-2 rotate-45" style="background:{{ p.acc }}"></span>{{ p.escopoTxt }}</span>
+<span class="program-scope inline-flex items-center gap-2 text-xs"><app-ui-icon name="lock" />{{ p.escopoTxt }}</span>
 </div>
 <div class="flex gap-6">
-<span class="flex-col gap-1"><span class="font-sans text-xs tracking-wider uppercase text-muted font-bold">OPT-IN</span><span class="font-mono text-2xl font-semibold">{{ p.inscritos }}</span></span>
-<span class="flex-col gap-1"><span class="font-sans text-xs tracking-wider uppercase text-muted font-bold">FILA</span><span class="font-mono text-2xl font-semibold">{{ p.fila }}</span></span>
-<span class="flex-col gap-1"><span class="font-sans text-xs tracking-wider uppercase text-muted font-bold">JANELA EXPIRA</span><span class="font-mono text-sm font-semibold" style="color:{{ p.acc }}">{{ p.expira }}</span></span>
+<span class="flex-col gap-1"><span class="font-sans text-xs text-muted font-medium">Opt-in</span><span class="font-mono text-2xl font-semibold">{{ p.inscritos }}</span></span>
+<span class="flex-col gap-1"><span class="font-sans text-xs text-muted font-medium">Fila</span><span class="font-mono text-2xl font-semibold">{{ p.fila }}</span></span>
+<span class="flex-col gap-1"><span class="font-sans text-xs text-muted font-medium">Janela expira</span><span class="font-mono text-sm font-semibold" style="color:{{ p.acc }}">{{ p.expira }}</span></span>
 </div>
 </div>
 @if (p.podeVer) {
@@ -733,7 +730,7 @@
 </span>
 }
 @if (f.fechado) {
-<button (click)="f.abrir()" class="border-danger text-danger btn-primary border bg-white flex items-center gap-2 transition-colors duration-150" [appHoverStyle]="'background:#FDECE7'">Abrir registro · quebra-vidro</button>
+<button (click)="f.abrir()" class="btn-danger-secondary">Abrir registro · quebra-vidro</button>
 }
 </div>
 }
@@ -757,7 +754,7 @@
 </div>
 }
 </div>
-<div class="bg-primary-dark text-on-dark rounded-md p-5 flex-col gap-2">
+<div class="card p-5 flex-col gap-2">
 <div class="section-heading"><span class="font-heading text-lg font-bold">O que esta camada não faz</span>
 <app-info-tip label="os limites desta camada" text="Não existe tela, filtro ou exportação que mostre dado financeiro individual de quem não optou por um programa. Não há score, ranking nem classificação de risco de feirante." /></div>
 </div>
@@ -795,9 +792,9 @@
 <app-info-tip label="as regras de supressão"><span class="tip-line">configuração legível, não código — vale para todas as telas agora</span>Exportação limitada a recortes que passam pelas regras acima. Séries brutas e recortes individuais são bloqueados na origem.</app-info-tip></div>
 </div>
 @for (r of vm.regras; track r.rot) {
-<div class="border-b border-soft flex justify-between items-baseline gap-3 pb-2">
+<div class="suppression-rule border-b border-soft pb-2">
 <span class="max-w-[58%] text-sm text-secondary leading-relaxed">{{ r.rot }}</span>
-<span class="bg-[#EDF1E7] font-mono text-xs font-semibold text-brand rounded-sm px-2 py-1 text-right">{{ r.val }}</span>
+<span class="suppression-rule__value text-xs font-semibold rounded-sm px-2 py-1">{{ r.val }}</span>
 </div>
 }
 <button (click)="vm.exportar()" class="btn-primary w-full justify-between mt-1 transition-transform" [appHoverStyle]="'transform:translateY(-1px)'">Exportar dados abertos agregados (CSV)<span class="font-mono opacity-70">↓</span></button>
@@ -806,11 +803,11 @@
 <section class="card overflow-hidden">
 <div class="p-4 border-b border-soft flex justify-between items-center gap-4 flex-wrap">
 <h2 class="font-heading text-xl font-bold m-0 text-brand">Log de acessos</h2>
-<div class="flex border rounded-md overflow-hidden">
+<app-segmented-control label="Tipo de acesso no log">
 @for (f of vm.filtrosLog; track f.rot) {
-<button (click)="f.go()" class="px-3 py-2 font-mono text-xs border-0 cursor-pointer transition-colors duration-150" style="background:{{ f.bg }};color:{{ f.fg }};font-weight:{{ f.w }}">{{ f.rot }}</button>
+<button (click)="f.go()" class="segmented-option" [class.active]="f.bg === 'var(--color-primary-dark)'" [attr.aria-pressed]="f.bg === 'var(--color-primary-dark)'">{{ f.rot === 'TODOS' ? 'Todos' : f.rot === 'QUEBRA-VIDRO' ? 'Quebra-vidro' : 'Agregado' }}</button>
 }
-</div>
+</app-segmented-control>
 </div>
 <div class="table-container" tabindex="0" role="region" aria-label="Log de acessos"><table class="table">
 <thead><tr>
@@ -823,10 +820,10 @@
 <tr [appHoverStyle]="'filter:brightness(.985)'">
 <td >{{ l.quando }}</td>
 <td >{{ l.quem }}</td>
-<td >{{ l.prog }}</td>
+<td [class.cell-empty]="l.prog === '—'">{{ l.prog }}</td>
 <td >{{ l.motivo }}</td>
 <td >{{ l.regs }}</td>
-<td >{{ l.notif }}</td>
+<td [class.cell-empty]="l.notif === '—'">{{ l.notif }}</td>
 </tr>
 }
 </tbody>
@@ -846,10 +843,10 @@
 </div>
 }
 </section>
-<aside class="bg-primary-dark text-on-dark flex-col gap-2 rounded-md p-5">
+<aside class="data-contact card flex-col gap-2 p-5">
 <div class="section-heading"><span class="font-heading text-lg font-bold">Encarregado de dados</span>
 <app-info-tip label="o atendimento aos titulares" text="Atendimento a titulares também pelo próprio WhatsApp do serviço, com resposta em até 15 dias." /></div>
-<span class="text-on-dark-soft text-sm leading-relaxed">Raimundo Sousa Lima<br>Encarregado (DPO) · SEMAPA<br><span class="font-mono text-xs">dpo.semapa&#64;saoluis.ma.gov.br<br>(98) 3212-0000</span></span>
+<span class="text-secondary text-sm leading-relaxed">Raimundo Sousa Lima<br>Encarregado (DPO) · SEMAPA<br><span class="font-sans text-xs">dpo.semapa&#64;saoluis.ma.gov.br<br>(98) 3212-0000</span></span>
 </aside>
 </div>
 </div>
@@ -863,14 +860,14 @@
 <app-modal [isOpen]="vm.modalAberto" title="Quebra-vidro · acesso identificado" subtitle="Você vai abrir um registro individual da camada 3. O titular optou por este programa. O acesso será registrado no log, notificado ao titular no WhatsApp e expira ao fim da janela do programa." (close)="vm.fecharModal()">
 <div class="p-6 pb-7 flex-col gap-4">
 <label class="flex-col gap-1">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">MOTIVO · LISTA FECHADA</span>
+<span class="font-sans text-xs text-muted font-medium">Motivo · lista fechada</span>
 <select class="form-select" [value]="vm.bgMotivo" (change)="vm.setBgMotivo($event)">
 <option value="">Selecione o motivo</option>
 @for (m of vm.motivos; track m) {<option [value]="m">{{ m }}</option>}
 </select>
 </label>
 <label class="flex-col gap-1">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">JUSTIFICATIVA · OBRIGATÓRIA</span>
+<span class="font-sans text-xs text-muted font-medium">Justificativa · obrigatória</span>
 <textarea class="form-textarea" [value]="vm.bgJust" (change)="vm.setBgJust($event)" rows="3" placeholder="Descreva por que este registro precisa ser aberto agora."></textarea>
 <span class="flex justify-between gap-2 font-mono text-xs">
 <span style="color:{{ vm.bgAviso.cor }}">{{ vm.bgAviso.txt }}</span>
@@ -879,7 +876,7 @@
 </label>
 <div class="flex justify-between items-center gap-3 flex-wrap border-t border-soft pt-4 mt-2">
 <span class="flex-col gap-1">
-<span class="font-sans text-xs tracking-wider text-muted uppercase font-bold">ESCOPO TEMPORAL</span>
+<span class="font-sans text-xs text-muted font-medium">Escopo temporal</span>
 <span class="font-mono text-sm font-semibold text-danger">expira em {{ vm.contador }}</span>
 </span>
 <span class="flex gap-2">

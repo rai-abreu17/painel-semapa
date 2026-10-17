@@ -6,11 +6,12 @@ import { ModalComponent } from './shared/components/modal/modal.component';
 import { UiIconComponent } from './shared/components/ui-icon/ui-icon.component';
 import { InfoTipComponent } from './shared/components/info-tip/info-tip.component';
 import { DashboardFiltersComponent } from './shared/components/dashboard-filters/dashboard-filters.component';
+import { SegmentedControlComponent } from './shared/components/segmented-control/segmented-control.component';
 
 
 @Component({
   selector: 'app-root',
-  imports: [HoverStyleDirective, KpiStatCardComponent, ModalComponent, UiIconComponent, InfoTipComponent, DashboardFiltersComponent],
+  imports: [HoverStyleDirective, KpiStatCardComponent, ModalComponent, UiIconComponent, InfoTipComponent, DashboardFiltersComponent, SegmentedControlComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

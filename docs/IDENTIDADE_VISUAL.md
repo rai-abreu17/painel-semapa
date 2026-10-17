@@ -1,5 +1,7 @@
 ﻿# Identidade visual do Painel SEMAPA
 
+Este documento registra a revisão anterior. Para o sistema visual vigente e sua validação em 17/10/2026, consulte [Revisão visual](REVISAO_VISUAL.md).
+
 ## Diagnóstico
 
 A inspeção do site publicado e dos componentes locais foi feita antes das alterações. Os principais problemas encontrados foram:

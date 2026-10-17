@@ -1,0 +1,101 @@
+/* Screen composition. Data, chart geometry and privacy decisions stay in the store. */
+.overview-layout > .kpi-grid { gap: 24px; border: 0; background: transparent; }
+.overview-layout .kpi-grid > app-kpi-stat-card + app-kpi-stat-card,
+.overview-layout .kpi-grid > app-kpi-stat-card:nth-child(n + 3) { border: 0; }
+.plan-canvas .floor-plan-cell { justify-content: flex-start; gap: 8px; }
+.floor-plan-cell__reading { gap: 4px; }
+.plan-header__text p, .section-meta, .sector-detail__state { line-height: 1.6; }
+.decision-alert__actions .btn-ghost { border: 1px solid var(--color-border); background: white; }
+.decision-alert__actions .btn-ghost:hover { border-color: var(--color-action); background: var(--color-primary-light); }
+.restriction-grid { display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--color-border); border-radius: var(--radius-md); background: white; }
+.restriction-card { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(120px, .8fr) minmax(180px, 1.5fr) minmax(170px, 1fr);
+  align-items: center; gap: 16px; padding: 16px 20px; border: 0; border-radius: 0; background: transparent; }
+.restriction-card + .restriction-card { border-top: 1px solid var(--color-border-soft); }
+.restriction-card__heading { align-items: center; }
+.restriction-card__status { align-self: center; justify-self: start; letter-spacing: 0; }
+.restriction-card > p { font-size: 12px; line-height: 1.6; }
+.restriction-card__progress { margin: 0; padding: 0; }
+.restriction-card__progress-label { flex-wrap: wrap; font-size: 12px; }
+.price-layout { grid-template-columns: minmax(0, 1.65fr) minmax(360px, 1fr); }
+.price-layout > .flex-col { gap: 24px; }
+.price-layout .table td { padding: 12px; }
+.price-layout .table td:not(:first-child) { white-space: nowrap; }
+.price-layout .table .bg-success { background-color: var(--color-primary-dark); }
+.price-layout .table-container { max-height: 840px; overflow: auto; }
+.price-layout .table thead { position: sticky; top: 0; z-index: 1; }
+.price-layout > .flex-col > .card:last-child { flex: 1; }
+.price-layout .table th button { font-size: 12px; letter-spacing: .025em; }
+.price-layout .table td:first-child { min-width: 160px; }
+.price-origin-legend { display: grid; gap: 8px; }
+.price-origin-legend > span { white-space: nowrap; }
+.price-event-list { display: none; }
+.health-summary { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.health-hero { color: var(--color-text-primary); border-left: 3px solid var(--color-danger); }
+.health-hero .text-on-dark-soft { color: var(--color-text-secondary); }
+.health-hero__value { color: var(--color-danger); font-size: 32px; font-variant-numeric: tabular-nums; }
+.health-hero .bg-white\/12, .health-hero .bg-white\/22 { background: var(--color-surface-alt); }
+.health-hero .border-white\/14 { border-color: var(--color-border-soft); }
+.maturity-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+.maturity-card { position: relative; display: flex; align-items: center; gap: 12px; min-height: 144px; padding-right: 44px !important; }
+.maturity-card > app-info-tip { position: absolute; right: 12px; top: 12px; }
+.margin-histogram { min-height: 220px; }
+.margin-histogram__count { white-space: nowrap; font-size: 12px; }
+.impact-chart .impact-event-label { display: none; }
+.impact-event-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;
+  padding-top: 16px; border-top: 1px solid var(--color-border-soft); }
+.impact-event-list > span { display: flex; align-items: baseline; gap: 8px;
+  color: var(--color-text-secondary); font-size: 12px; line-height: 1.6; }
+.impact-event-list__marker { display: inline-block; width: 6px; height: 6px; flex: none; border-radius: 2px; }
+.coverage-sector-row__bar { height: 12px; margin-top: 2px; }
+.coverage-threshold { width: 3px; top: -3px; bottom: -3px; outline: 2px solid white; }
+.coverage-completeness { display: block; text-align: right; line-height: 1.6; }
+.registry-row { padding-block: 12px; }
+.registry-row .badge { white-space: normal; }
+.registry-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: stretch; }
+.registry-side { display: contents; }
+.registry-history { grid-column: 1 / -1; }
+.program-card { border-color: var(--color-border); }
+.program-card--in-scope { border-left: 3px solid var(--color-primary-dark); }
+.program-scope { align-self: start; color: var(--color-text-secondary); font-weight: 500; }
+.program-card--in-scope .program-scope { color: var(--color-primary-dark); }
+.program-scope app-ui-icon { width: 14px; height: 14px; }
+.program-card--out-of-scope { background: var(--color-surface-muted); }
+.suppression-rule { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px; align-items: start; padding-block: 10px; }
+.suppression-rule > .max-w-\[58\%\] { max-width: none; }
+.suppression-rule__value { background: var(--color-surface-alt); color: var(--color-text-primary); text-align: right; font-weight: 500; line-height: 1.6; }
+.data-contact { align-self: stretch; justify-content: center; }
+@media (max-width: 1279px) {
+  .price-layout { grid-template-columns: minmax(0, 1fr); }
+  .price-layout > .flex-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  .price-layout > .flex-col > .card:last-child { grid-column: 1 / -1; }
+  .price-layout .table-container { max-height: none; }
+  .restriction-card { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 20px; }
+  .restriction-card__status { justify-self: end; }
+  .restriction-card__progress { align-self: end; }
+  .maturity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .impact-event-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .registry-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+  .overview-layout > .kpi-grid { gap: 12px; }
+  .restriction-card { padding: 16px; gap: 8px 12px; }
+  .restriction-card__heading { grid-column: 1 / -1; }
+  .restriction-card__status { grid-column: 1 / -1; justify-self: start; }
+  .restriction-card > p, .restriction-card__progress { grid-column: 1 / -1; }
+  .restriction-card__progress { gap: 6px; }
+  .health-summary, .price-layout > .flex-col { grid-template-columns: minmax(0, 1fr); }
+  .price-event-label { display: none; }
+  .price-event-list { display: flex; flex-wrap: wrap; gap: 8px; color: var(--color-text-secondary); font-size: 12px; }
+  .price-event-list > span { padding: 3px 6px; border: 1px solid var(--color-border); border-radius: 4px; }
+  .maturity-grid { gap: 12px; }
+  .maturity-card { flex-direction: column; align-items: start; padding: 20px 16px !important; gap: 12px; }
+  .maturity-card > app-info-tip { right: 8px; top: 8px; }
+  .maturity-card > .flex-col { padding-right: 0; }
+  .margin-histogram { gap: 8px; }
+  .margin-histogram__count { white-space: normal; }
+  .impact-event-list { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .suppression-rule { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px; }
+  .occupancy-row { gap: 8px 12px; padding-block: 12px; }
+  .data-contact { justify-content: start; }
+}

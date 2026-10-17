@@ -5,6 +5,8 @@
   --color-primary: #4b86ae;
   --color-primary-light: #edf3f8;
   --color-primary-light-2: #dce7f0;
+  --color-chart-2: #435c78;
+  --color-chart-3: #596a80;
   --color-action: #245b87;
   --color-action-hover: #1b476b;
   --color-accent-light: #90bb6f;
@@ -34,29 +36,46 @@
   --color-badge-inactive: var(--color-danger-tint);
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: var(--font-body);
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-mono: var(--font-body);
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
   --space-xs: 4px;
   --space-sm: 8px;
+  --space-3: 12px;
   --space-md: 16px;
+  --space-5: 20px;
   --space-lg: 24px;
-  --space-xl: 40px;
+  --space-xl: 32px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 12px;
   --radius-pill: 9999px;
-  --control-height: 38px;
+  --control-height: 36px;
+  --control-border: #8796a8;
   --control-radius: 6px;
   --shadow-sm: 0 1px 2px rgb(25 49 91 / 3%);
   --shadow-card: 0 1px 2px rgb(25 49 91 / 2%);
   --shadow-card-hover: 0 4px 14px rgb(25 49 91 / 7%);
   --shadow-popover: 0 8px 32px rgb(25 49 91 / 14%);
   --shadow-modal: 0 24px 80px rgb(8 45 105 / 20%);
-  --sidebar-width: 236px;
+  --sidebar-width: 280px;
   --page-gutter: 32px;
-  --content-max-width: 1560px;
+  --content-max-width: 1440px;
+  --header-height: 56px;
+  --transition: 150ms ease;
+  --z-filters: 9;
   --z-header: 10;
   --z-backdrop: 30;
   --z-sidebar: 40;
   --z-modal: 60;
   --z-toast: 70;
+}
+
+@media (max-width: 1023.98px) {
+  :root { --control-height: 40px; }
 }

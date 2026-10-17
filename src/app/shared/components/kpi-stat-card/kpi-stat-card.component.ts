@@ -7,10 +7,10 @@ import { InfoTipComponent } from '../info-tip/info-tip.component';
   standalone: true,
   imports: [UiIconComponent, InfoTipComponent],
   template: `
-    <article class="kpi-card" [class]="tone" [attr.aria-label]="title">
+    <article class="kpi-card" [class]="tone" [class.kpi-card--compact]="compact" [attr.aria-label]="title">
       <div class="kpi-card__header">
         <span class="kpi-card__icon"><app-ui-icon [name]="icon || (tone === 'danger' ? 'chart' : tone === 'primary' ? 'records' : 'people')" /></span>
-        <span class="kpi-card__title">{{ title }}</span>
+        <span class="kpi-card__title">{{ title.charAt(0) + title.slice(1).toLocaleLowerCase('pt-BR').replace('d30', 'D30') }}</span>
         @if (hint || sub || nota) {
           <app-info-tip [label]="title">
             @if (hint) { <span class="tip-line">{{ hint }}</span> }
@@ -75,6 +75,7 @@ export class KpiStatCardComponent {
   @Input() sparkline?: string;
   @Input() tone: 'primary-dark' | 'primary' | 'accent' | 'warning' | 'danger' | 'default' = 'default';
   @Input() hint?: string;
+  @Input() compact = false;
   
   // Específicos do painel-semapa que podem ser mapeados
   @Input() barra?: number;

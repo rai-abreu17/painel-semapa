@@ -21,7 +21,8 @@ let nextTipId = 0;
     .info-trigger { display: inline-flex; align-items: center; justify-content: center;
       width: 24px; height: 24px; padding: 0; border: 1px solid var(--color-border);
       border-radius: 50%; background: var(--color-surface-card); color: var(--color-text-secondary);
-      font: 600 12px var(--font-body); cursor: help; }
+      font: 600 12px var(--font-body); cursor: help;
+      transition: background-color var(--transition), border-color var(--transition), color var(--transition); }
     .info-trigger:hover, .info-trigger[aria-expanded="true"] {
       background: var(--color-primary-light); color: var(--color-primary-dark); border-color: var(--color-primary); }
     .info-popover { position: fixed; inset: auto; margin: 0; width: min(340px, calc(100vw - 32px));
@@ -31,6 +32,9 @@ let nextTipId = 0;
       box-shadow: var(--shadow-popover); font: 400 13px/1.65 var(--font-body);
       text-wrap: pretty; }
     .info-popover::backdrop { background: transparent; }
+    @media (max-width: 1023.98px) {
+      .info-trigger { width: 40px; height: 40px; }
+    }
   `],
 })
 export class InfoTipComponent {
